@@ -34,7 +34,7 @@ public class SecurityConfig {
         return converter;
     }
 
-    // Inyecta el converter como parámetro y pásalo explícitamente
+    // Inyecta el converter como parámetro y pásalo explícitament
     @Bean
     SecurityFilterChain security(HttpSecurity http, JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
         return http
