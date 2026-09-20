@@ -11,7 +11,8 @@ public class ClienteService {
         return new ClienteResponse(
             id,
             "Wacoldo Soto",
-            "waco.soto@duocuc.cl"
+            "waco.soto@duocuc.cl",
+            "+56912345678"
         );
     }
 }

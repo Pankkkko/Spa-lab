@@ -12,5 +12,5 @@ spring:
 microservices:
   clientes:
     base-url: http://localhost:8081
-  mascotas:
+  pedidos:
     base-url: http://localhost:8082

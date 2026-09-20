@@ -1,10 +1,10 @@
-package cl.duoc.msmascotas;
+package cl.duoc.mspedidos;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class MsMascotasApplicationTests {
+class MsPedidosApplicationTests {
 
 	@Test
 	void contextLoads() {
