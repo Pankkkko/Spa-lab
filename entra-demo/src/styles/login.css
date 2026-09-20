@@ -1,0 +1,389 @@
+:root {
+    --mar-light: #cff0ea;
+    --mar-soft: #88c9c4;
+    --mar-medium: #3e9b94;
+    --mar-deep: #20666b;
+    --mar-dark: #0c3b45;
+
+    --background: #06131c;
+    --card-background: #081923;
+    --input-background: #050b10;
+
+    --text-primary: #f4fffd;
+    --text-secondary: #a8c7c4;
+    --border: rgba(136, 201, 196, 0.18);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+    background: var(--background);
+    color: var(--text-primary);
+}
+
+button {
+    font-family: inherit;
+}
+
+/* ========================================
+   PÁGINA
+   ======================================== */
+
+.login-page {
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    position: relative;
+    overflow: hidden;
+
+    padding: 32px;
+
+    background:
+        radial-gradient(circle at 20% 20%,
+            rgba(62, 155, 148, 0.13),
+            transparent 30%),
+        radial-gradient(circle at 80% 80%,
+            rgba(32, 102, 107, 0.15),
+            transparent 35%),
+        linear-gradient(135deg,
+            #06131c 0%,
+            #071923 50%,
+            #0c2029 100%);
+}
+
+/* ========================================
+   TARJETA
+   ======================================== */
+
+.login-card {
+    width: 100%;
+    max-width: 440px;
+
+    position: relative;
+    z-index: 2;
+
+    padding: 38px;
+
+    border: 1px solid var(--border);
+    border-radius: 12px;
+
+    background:
+        linear-gradient(145deg,
+            rgba(12, 59, 69, 0.18),
+            rgba(5, 14, 20, 0.88));
+
+    box-shadow:
+        0 24px 70px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba(207, 240, 234, 0.04);
+
+    backdrop-filter: blur(16px);
+}
+
+/* ========================================
+   LOGO
+   ======================================== */
+
+.brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    margin-bottom: 38px;
+}
+
+.brand-name {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+
+    color: var(--mar-light);
+}
+
+.brand-icon {
+    width: 26px;
+    height: 26px;
+
+    position: relative;
+}
+
+.brand-icon span {
+    position: absolute;
+
+    width: 9px;
+    height: 9px;
+
+    border-radius: 3px;
+
+    background: var(--mar-medium);
+}
+
+.brand-icon span:nth-child(1) {
+    top: 2px;
+    left: 8px;
+}
+
+.brand-icon span:nth-child(2) {
+    top: 10px;
+    left: 2px;
+
+    background: var(--mar-soft);
+}
+
+.brand-icon span:nth-child(3) {
+    top: 12px;
+    left: 13px;
+
+    background: var(--mar-deep);
+}
+
+/* ========================================
+   HEADER
+   ======================================== */
+
+.login-header {
+    margin-bottom: 30px;
+}
+
+.login-header h1 {
+    margin: 0 0 12px;
+
+    font-size: 34px;
+    line-height: 1.1;
+
+    letter-spacing: -1px;
+}
+
+.login-header p {
+    margin: 0;
+
+    color: var(--text-secondary);
+
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.login-header strong {
+    color: var(--mar-soft);
+}
+
+/* ========================================
+   BOTÓN MICROSOFT
+   ======================================== */
+
+.microsoft-login-button {
+    width: 100%;
+    height: 52px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+
+    border: 1px solid rgba(207, 240, 234, 0.25);
+    border-radius: 7px;
+
+    background: var(--mar-light);
+    color: #071923;
+
+    font-size: 15px;
+    font-weight: 650;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.15s ease,
+        background 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.microsoft-login-button:hover:not(:disabled) {
+    background: #ffffff;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 8px 25px rgba(136, 201, 196, 0.18);
+}
+
+.microsoft-login-button:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.microsoft-login-button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* ========================================
+   LOGO MICROSOFT
+   ======================================== */
+
+.microsoft-logo {
+    width: 18px;
+    height: 18px;
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+
+    gap: 2px;
+}
+
+.microsoft-logo span:nth-child(1) {
+    background: #f25022;
+}
+
+.microsoft-logo span:nth-child(2) {
+    background: #7fba00;
+}
+
+.microsoft-logo span:nth-child(3) {
+    background: #00a4ef;
+}
+
+.microsoft-logo span:nth-child(4) {
+    background: #ffb900;
+}
+
+/* ========================================
+   DIVISOR
+   ======================================== */
+
+.login-divider {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    margin: 28px 0;
+}
+
+.login-divider::before,
+.login-divider::after {
+    content: "";
+
+    height: 1px;
+    flex: 1;
+
+    background: var(--border);
+}
+
+.login-divider span {
+    color: var(--text-secondary);
+
+    font-size: 13px;
+}
+
+/* ========================================
+   INFORMACIÓN
+   ======================================== */
+
+.login-info {
+    text-align: center;
+
+    padding: 0 10px;
+}
+
+.login-info p {
+    margin: 0 0 8px;
+
+    color: var(--text-secondary);
+
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.login-info span {
+    color: rgba(168, 199, 196, 0.65);
+
+    font-size: 12px;
+}
+
+/* ========================================
+   DECORACIÓN DE FONDO
+   ======================================== */
+
+.login-background-decoration {
+    position: absolute;
+
+    border-radius: 50%;
+
+    filter: blur(90px);
+
+    pointer-events: none;
+}
+
+.decoration-one {
+    width: 300px;
+    height: 300px;
+
+    top: -120px;
+    left: -100px;
+
+    background: rgba(62, 155, 148, 0.08);
+}
+
+.decoration-two {
+    width: 350px;
+    height: 350px;
+
+    bottom: -180px;
+    right: -120px;
+
+    background: rgba(32, 102, 107, 0.1);
+}
+
+/* ========================================
+   FOOTER
+   ======================================== */
+
+.login-footer {
+    position: absolute;
+
+    bottom: 20px;
+
+    display: flex;
+    gap: 8px;
+
+    color: rgba(168, 199, 196, 0.45);
+
+    font-size: 12px;
+
+    z-index: 2;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 600px) {
+    .login-page {
+        padding: 20px;
+    }
+
+    .login-card {
+        padding: 28px 24px;
+    }
+
+    .login-header h1 {
+        font-size: 29px;
+    }
+
+    .login-footer {
+        display: none;
+    }
+}
