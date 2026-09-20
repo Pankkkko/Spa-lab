@@ -1,0 +1,157 @@
+.home-page {
+    min-height: 100vh;
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 2rem;
+
+    background: linear-gradient(135deg,
+            #cff0ea 0%,
+            #88c9c4 45%,
+            #20666b 100%);
+
+    box-sizing: border-box;
+}
+
+.home-card {
+    width: 100%;
+    max-width: 650px;
+
+    padding: 4rem 3.5rem;
+
+    background: rgba(255, 255, 255, 0.94);
+
+    border-radius: 24px;
+
+    box-shadow:
+        0 20px 50px rgba(12, 59, 69, 0.25);
+
+    text-align: center;
+
+    box-sizing: border-box;
+}
+
+.home-welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.home-logo {
+    width: 70px;
+    height: 70px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 1rem;
+
+    border-radius: 18px;
+
+    background: #0c3b45;
+    color: #cff0ea;
+
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+
+    box-shadow:
+        0 8px 20px rgba(12, 59, 69, 0.2);
+}
+
+.home-label {
+    margin-bottom: 0.75rem;
+
+    color: #20666b;
+
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+}
+
+.home-welcome h1 {
+    margin: 0;
+
+    color: #0c3b45;
+
+    font-size: 3rem;
+    line-height: 1.1;
+    font-weight: 800;
+}
+
+.home-welcome p {
+    max-width: 480px;
+
+    margin: 1.25rem auto 2rem;
+
+    color: #4d6f73;
+
+    font-size: 1.05rem;
+    line-height: 1.6;
+}
+
+.home-button {
+    width: 100%;
+    max-width: 300px;
+
+    padding: 0.95rem 1.5rem;
+
+    border: none;
+    border-radius: 12px;
+
+    background: #20666b;
+    color: white;
+
+    font-size: 1rem;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.home-button:hover {
+    background: #0c3b45;
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 8px 20px rgba(12, 59, 69, 0.25);
+}
+
+.home-button:active {
+    transform: translateY(0);
+}
+
+.logout-button {
+    background: #3e9b94;
+}
+
+.logout-button:hover {
+    background: #20666b;
+}
+
+@media (max-width: 600px) {
+    .home-page {
+        padding: 1rem;
+    }
+
+    .home-card {
+        padding: 3rem 1.75rem;
+    }
+
+    .home-welcome h1 {
+        font-size: 2.3rem;
+    }
+
+    .home-welcome p {
+        font-size: 0.95rem;
+    }
+}

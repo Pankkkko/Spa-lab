@@ -6,7 +6,11 @@ import LoginCard from '../components/LoginCard';
 
 import '../styles/login.css';
 
-export default function LoginPage() {
+interface LoginPageProps {
+    onBack: () => void;
+}
+
+export default function LoginPage({ onBack }: LoginPageProps) {
     const { instance, inProgress } = useMsal();
 
     const ocupado = inProgress !== InteractionStatus.None;
@@ -29,6 +33,14 @@ export default function LoginPage() {
             <div className="login-background-decoration decoration-one"></div>
             <div className="login-background-decoration decoration-two"></div>
 
+            <button
+                className="back-button"
+                onClick={onBack}
+                type="button"
+            >
+                ← Volver al inicio
+            </button>
+
             <LoginCard
                 onLogin={() => void iniciarSesion()}
                 disabled={ocupado}
@@ -42,3 +54,4 @@ export default function LoginPage() {
         </main>
     );
 }
+

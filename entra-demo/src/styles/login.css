@@ -387,3 +387,48 @@ button {
         display: none;
     }
 }
+
+.back-button {
+    position: absolute;
+    top: 28px;
+    left: 32px;
+
+    padding: 8px 12px;
+
+    border: 1px solid var(--border);
+    border-radius: 7px;
+
+    background: rgba(12, 59, 69, 0.18);
+
+    color: var(--mar-soft);
+
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    z-index: 3;
+
+    transition:
+        background 0.15s ease,
+        color 0.15s ease,
+        border-color 0.15s ease,
+        transform 0.15s ease;
+}
+
+.back-button:hover {
+    background: rgba(62, 155, 148, 0.15);
+
+    color: var(--mar-light);
+
+    border-color: rgba(136, 201, 196, 0.35);
+
+    transform: translateY(-1px);
+}
+
+@media (max-width: 600px) {
+    .back-button {
+        top: 18px;
+        left: 20px;
+    }
+}
