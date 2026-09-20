@@ -7,25 +7,57 @@
 
 ## 1. Visión General
 
+El sistema **Pedidos360** se compone de cuatro componentes desplegados en AWS:
+
+1. **Frontend** (React/Angular + MSAL) → servido por Nginx en una instancia EC2.
+2. **API Gateway** → punto de entrada público con HTTPS y validación JWT.
+3. **BFF (Backend for Frontend)** → Spring Boot que valida JWT y orquesta microservicios.
+4. **Microservicios** → `ms-clientes` y `ms-pedidos`, cada uno en su propia EC2 con su propia base de datos RDS.
+
 ```text
-React (localhost:5173)
-   │
-   │  Authorization: Bearer <access_token>
-   ▼
-BFF (localhost:8080)
-   │  Valida JWT (scope + roles)
-   │
-   ├──► ms-clientes (localhost:8081) ──► RDS MySQL (AWS)
-   │
-   └──► ms-pedidos  (localhost:8082) ──► RDS MySQL (AWS)
+┌──────────────────────────────────────────────────────────────────────┐
+│                              AWS VPC                                 │
+│                                                                      │
+│  ┌────────────────┐                                                  │
+│  │  EC2 #1        │  Frontend (React/Angular + Nginx)                │
+│  │  :80/:443      │                                                  │
+│  └───────┬────────┘                                                  │
+│          │ HTTPS                                                     │
+│          ▼                                                            │
+│  ┌────────────────┐                                                  │
+│  │  API Gateway   │  Valida JWT + HTTPS                              │
+│  └───────┬────────┘                                                  │
+│          │                                                            │
+│          ▼                                                            │
+│  ┌────────────────┐                                                  │
+│  │  EC2 #2        │  BFF (Spring Boot) :8080                         │
+│  └───┬────────┬───┘                                                  │
+│      │        │                                                      │
+│      ▼        ▼                                                      │
+│  ┌─────────┐  ┌─────────┐                                            │
+│  │ EC2 #3  │  │ EC2 #4  │                                            │
+│  │ms-client│  │ms-pedid │                                            │
+│  │  :8081  │  │  :8082  │                                            │
+│  └────┬────┘  └────┬────┘                                            │
+│       │            │                                                 │
+│       ▼            ▼                                                 │
+│  ┌─────────────────────────────────┐                                 │
+│  │      RDS MySQL (AWS)            │                                 │
+│  │  pedidos360_clientes            │                                 │
+│  │  pedidos360_pedidos             │                                 │
+│  └─────────────────────────────────┘                                 │
+│                                                                      │
+└──────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Reglas clave
 
 - El **frontend nunca** llama directamente a los microservicios.
-- El **BFF** es el único punto de entrada al backend.
-- Cada microservicio tiene su **propia base de datos** (o esquema).
-- Todos los componentes se despliegan en **AWS** (EC2 + RDS + API Gateway).
+- El **API Gateway** es el único punto de entrada público al backend.
+- El **BFF** valida el JWT y orquesta las llamadas a los microservicios.
+- Cada microservicio tiene su **propia base de datos** (o esquema) en RDS.
+- Los microservicios **no validan JWT** (confían en el BFF).
+- Todo está en **AWS VPC** con subredes públicas y privadas.
 
 ---
 
@@ -122,14 +154,21 @@ pedidos360/
 
 ## 3. Responsabilidades por Componente
 
-### Frontend (React)
+### Frontend (React/Angular)
 
 - Login con MSAL (Entra ID).
-- Obtener access token para el BFF.
+- Obtener access token para el API Gateway.
 - Adjuntar token en cada llamada (header `Authorization`).
 - Mostrar datos de clientes y pedidos.
-- **No** valida JWT (lo hace el BFF).
+- **No** valida JWT (lo hace el API Gateway / BFF).
 - **No** conoce los microservicios.
+
+### API Gateway (AWS)
+
+- Punto de entrada público.
+- Termina HTTPS.
+- Valida JWT (opcional, delega en el BFF).
+- Redirige al BFF.
 
 ### BFF (bff-pedidos360)
 
@@ -138,7 +177,7 @@ pedidos360/
 - Verifica rol (`Admin`, `Cliente`).
 - Orquesta llamadas a `ms-clientes` y `ms-pedidos`.
 - Combina respuestas y las adapta para el frontend.
-- Aplica CORS para permitir `localhost:5173`.
+- Aplica CORS.
 
 ### ms-clientes
 
@@ -158,7 +197,7 @@ pedidos360/
 
 ## 4. Contrato de API (Frontend ↔ BFF)
 
-> Todas las peticiones del frontend van al BFF (`http://localhost:8080`).
+> Todas las peticiones del frontend van al **API Gateway**, que reenvía al BFF.
 > Todas requieren header: `Authorization: Bearer <access_token>`
 
 ### 4.1 `GET /api/clientes/{id}`
@@ -285,49 +324,50 @@ pedidos360/
 VITE_ENTRA_TENANT_ID=49551105-7651-4748-a01b-22b28daeb087
 VITE_SPA_CLIENT_ID=<SPA_CLIENT_ID>
 VITE_API_CLIENT_ID=fa47563a-a68d-4d29-93c1-64bbfab52085
-VITE_BFF_BASE_URL=http://localhost:8080
+VITE_API_BASE_URL=https://<api-gateway-url>
 ```
 
-### BFF (PowerShell)
+### BFF (EC2 — variables de entorno del sistema)
 
-```powershell
-$env:ENTRA_ISSUER_URI="https://login.microsoftonline.com/49551105-7651-4748-a01b-22b28daeb087/v2.0"
-$env:ENTRA_API_CLIENT_ID="fa47563a-a68d-4d29-93c1-64bbfab52085"
-$env:MS_CLIENTES_URL="http://localhost:8081"
-$env:MS_PEDIDOS_URL="http://localhost:8082"
-$env:DB_CLIENTES_URL="jdbc:mysql://<RDS_HOST>:3306/pedidos360_clientes"
-$env:DB_PEDIDOS_URL="jdbc:mysql://<RDS_HOST>:3306/pedidos360_pedidos"
-$env:DB_USERNAME="admin"
-$env:DB_PASSWORD="<password>"
+```bash
+ENTRA_ISSUER_URI=https://login.microsoftonline.com/49551105-7651-4748-a01b-22b28daeb087/v2.0
+ENTRA_API_CLIENT_ID=fa47563a-a68d-4d29-93c1-64bbfab52085
+MS_CLIENTES_URL=http://<ip-privada-ec2-3>:8081
+MS_PEDIDOS_URL=http://<ip-privada-ec2-4>:8082
+DB_CLIENTES_URL=jdbc:mysql://<rds-host>:3306/pedidos360_clientes
+DB_PEDIDOS_URL=jdbc:mysql://<rds-host>:3306/pedidos360_pedidos
+DB_USERNAME=admin
+DB_PASSWORD=<password>
 ```
 
-### ms-clientes (PowerShell)
+### ms-clientes (EC2 — variables de entorno del sistema)
 
-```powershell
-$env:DB_CLIENTES_URL="jdbc:mysql://<RDS_HOST>:3306/pedidos360_clientes"
-$env:DB_USERNAME="admin"
-$env:DB_PASSWORD="<password>"
+```bash
+DB_CLIENTES_URL=jdbc:mysql://<rds-host>:3306/pedidos360_clientes
+DB_USERNAME=admin
+DB_PASSWORD=<password>
 ```
 
-### ms-pedidos (PowerShell)
+### ms-pedidos (EC2 — variables de entorno del sistema)
 
-```powershell
-$env:DB_PEDIDOS_URL="jdbc:mysql://<RDS_HOST>:3306/pedidos360_pedidos"
-$env:DB_USERNAME="admin"
-$env:DB_PASSWORD="<password>"
+```bash
+DB_PEDIDOS_URL=jdbc:mysql://<rds-host>:3306/pedidos360_pedidos
+DB_USERNAME=admin
+DB_PASSWORD=<password>
 ```
 
 ---
 
 ## 6. Puertos y Servicios
 
-| Servicio | Puerto | Comando de arranque |
-|----------|--------|---------------------|
-| Frontend React | 5173 | `npm run dev -- --port 5173 --strictPort` |
-| BFF | 8080 | `.\mvnw.cmd spring-boot:run` |
-| ms-clientes | 8081 | `.\mvnw.cmd spring-boot:run` |
-| ms-pedidos | 8082 | `.\mvnw.cmd spring-boot:run` |
-| RDS MySQL | 3306 | (servicio gestionado en AWS) |
+| Servicio | Puerto | Hosting | Comando |
+|----------|--------|---------|---------|
+| Frontend (build) | 80/443 | EC2 #1 (Nginx) | `nginx` |
+| API Gateway | 443 | AWS managed | — |
+| BFF | 8080 | EC2 #2 | `java -jar bff-pedidos360.jar` |
+| ms-clientes | 8081 | EC2 #3 | `java -jar ms-clientes.jar` |
+| ms-pedidos | 8082 | EC2 #4 | `java -jar ms-pedidos.jar` |
+| RDS MySQL | 3306 | AWS managed | — |
 
 ---
 
@@ -393,19 +433,49 @@ build/
 
 ---
 
-## 9. Despliegue en AWS (Fase Posterior)
+## 9. Despliegue en AWS
 
-### Componentes a desplegar
+### 9.1 Arquitectura de red
 
-- **RDS MySQL**: dos esquemas (`pedidos360_clientes`, `pedidos360_pedidos`).
-- **EC2**: una instancia por microservicio + BFF (o una instancia con varios JARs).
-- **API Gateway**: punto de entrada público con validación JWT.
-- **Certificado HTTPS**: para el dominio del API Gateway.
+| Componente | Subred | Security Group | Acceso permitido desde |
+|------------|--------|----------------|------------------------|
+| EC2 #1 (Frontend) | Pública | `sg-frontend` | Internet (80/443) |
+| API Gateway | Pública (managed) | — | Internet (443) |
+| EC2 #2 (BFF) | Privada | `sg-bff` | API Gateway |
+| EC2 #3 (ms-clientes) | Privada | `sg-ms-clientes` | `sg-bff` |
+| EC2 #4 (ms-pedidos) | Privada | `sg-ms-pedidos` | `sg-bff` |
+| RDS MySQL | Privada | `sg-rds` | `sg-ms-clientes`, `sg-ms-pedidos` |
 
-### Flujo en producción
+### 9.2 Instancias EC2
+
+| # | Nombre | Componente | Tipo sugerido | AMI |
+|---|--------|------------|---------------|-----|
+| 1 | `ec2-frontend` | React/Angular + Nginx | t3.micro | Amazon Linux 2023 |
+| 2 | `ec2-bff` | BFF Spring Boot | t3.small | Amazon Linux 2023 (JDK 25) |
+| 3 | `ec2-ms-clientes` | ms-clientes Spring Boot | t3.small | Amazon Linux 2023 (JDK 25) |
+| 4 | `ec2-ms-pedidos` | ms-pedidos Spring Boot | t3.small | Amazon Linux 2023 (JDK 25) |
+
+### 9.3 Flujo de despliegue
 
 ```text
-React ──► API Gateway (HTTPS) ──► BFF (EC2) ──► ms-clientes + ms-pedidos (EC2) ──► RDS
+1. Empaquetar JARs:  ./mvnw clean package
+2. Subir JARs a EC2:  scp target/*.jar ec2-user@<ip>:/opt/app/
+3. Definir variables de entorno en cada EC2.
+4. Arrancar servicios:  java -jar /opt/app/<app>.jar
+5. Configurar Nginx en EC2 #1 para servir el build del frontend.
+6. Configurar API Gateway para redirigir al BFF.
+7. Asociar certificado HTTPS (ACM) al API Gateway.
+```
+
+### 9.4 Flujo en producción
+
+```text
+Usuario
+   │
+   ▼ HTTPS
+API Gateway ──► BFF (EC2 #2) ──► ms-clientes (EC2 #3) ──► RDS MySQL
+                        │
+                        └──► ms-pedidos (EC2 #4) ──► RDS MySQL
 ```
 
 ---
@@ -414,16 +484,20 @@ React ──► API Gateway (HTTPS) ──► BFF (EC2) ──► ms-clientes + 
 
 - [ ] Los 4 proyectos compilan sin errores.
 - [ ] El frontend hace login con MSAL.
-- [ ] El frontend adjunta el token en cada llamada al BFF.
+- [ ] El frontend adjunta el token en cada llamada al API Gateway.
 - [ ] El BFF valida issuer, audiencia, firma y vigencia.
 - [ ] El BFF valida scope (`pedidos.read`, `pedidos.write`).
 - [ ] El BFF valida rol (`Admin`, `Cliente`).
 - [ ] El BFF orquesta llamadas a `ms-clientes` y `ms-pedidos`.
 - [ ] Los microservicios leen/escriben en RDS MySQL.
-- [ ] CORS configurado en el BFF para `localhost:5173`.
+- [ ] CORS configurado en el BFF.
 - [ ] `.gitignore` configurado en cada repo.
 - [ ] Repositorios en GitHub con README.
-- [ ] Despliegue en AWS funcional (EC2 + RDS + API Gateway).
+- [ ] **4 instancias EC2 desplegadas** (Frontend, BFF, ms-clientes, ms-pedidos).
+- [ ] **API Gateway configurado** delante del BFF.
+- [ ] **RDS MySQL** con dos esquemas creados.
+- [ ] **Certificado HTTPS** asociado al API Gateway.
+- [ ] **Security Groups** configurados según la sección 9.1.
 
 ---
 
