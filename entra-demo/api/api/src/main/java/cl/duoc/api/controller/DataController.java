@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import cl.duoc.api.dto.ClienteResponse;
+import cl.duoc.api.dto.ClienteDetalleResponse;
 import cl.duoc.api.service.DataService;
 
 @RestController
@@ -18,7 +18,7 @@ public class DataController {
     }
 
     @GetMapping("/data")
-    public ClienteResponse data() {
-        return dataService.obtenerData();
+    public ClienteDetalleResponse data() {
+        return dataService.obtenerData(1L);  // <-- AQUÍ está el fix: pasa el clienteId
     }
 }
