@@ -17,6 +17,7 @@ export const msalConfig: Configuration = {
 
 export const tokenRequest = {
   scopes: [
-    `api://${import.meta.env.VITE_API_CLIENT_ID}/access_as_user`,
+    `api://${import.meta.env.VITE_API_CLIENT_ID}/pedidos.read`,
+    `api://${import.meta.env.VITE_API_CLIENT_ID}/pedidos.write`,
   ],
 };
