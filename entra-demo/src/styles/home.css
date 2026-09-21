@@ -155,3 +155,130 @@
         font-size: 0.95rem;
     }
 }
+
+.orders-section {
+width: 100%;
+margin-top: 2rem;
+padding-top: 1.5rem;
+border-top: 1px solid rgba(32, 102, 107, 0.18);
+}
+
+.orders-header {
+margin-bottom: 1rem;
+}
+
+.orders-header h2 {
+margin: 0;
+color: #0C3B45;
+font-size: 1.5rem;
+}
+
+.orders-header p {
+margin: 0.35rem 0 0;
+color: #20666B;
+font-size: 0.9rem;
+}
+
+.orders-list {
+display: flex;
+flex-direction: column;
+gap: 1rem;
+}
+
+.order-card {
+padding: 1.2rem;
+border-radius: 16px;
+background: rgba(207, 240, 234, 0.55);
+border: 1px solid rgba(62, 155, 148, 0.25);
+}
+
+.order-card-header {
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 1rem;
+}
+
+.order-label {
+display: block;
+color: #20666B;
+font-size: 0.75rem;
+text-transform: uppercase;
+letter-spacing: 0.08em;
+}
+
+.order-card h3 {
+margin: 0.15rem 0 0;
+color: #0C3B45;
+font-size: 1.2rem;
+}
+
+.order-status {
+padding: 0.35rem 0.7rem;
+border-radius: 999px;
+font-size: 0.75rem;
+font-weight: 700;
+}
+
+.status-enviado {
+background: #88C9C4;
+color: #0C3B45;
+}
+
+.status-entregado {
+background: #CFF0EA;
+color: #20666B;
+}
+
+.status-pendiente {
+background: #fff;
+color: #20666B;
+border: 1px solid #88C9C4;
+}
+
+.order-info {
+display: flex;
+justify-content: space-between;
+align-items: center;
+gap: 1rem;
+margin-top: 1rem;
+color: #20666B;
+font-size: 0.9rem;
+}
+
+.order-info strong {
+color: #0C3B45;
+font-size: 1rem;
+}
+
+.order-details {
+display: flex;
+flex-direction: column;
+gap: 0.45rem;
+margin-top: 1rem;
+padding-top: 0.8rem;
+border-top: 1px solid rgba(32, 102, 107, 0.12);
+}
+
+.order-detail {
+display: flex;
+justify-content: space-between;
+gap: 1rem;
+color: #20666B;
+font-size: 0.85rem;
+}
+
+.orders-message {
+margin: 1rem 0 0;
+color: #20666B;
+text-align: center;
+}
+
+.orders-error {
+margin: 1rem 0 0;
+padding: 0.8rem;
+border-radius: 10px;
+background: rgba(255, 255, 255, 0.7);
+color: #8a3030;
+font-size: 0.9rem;
+}
