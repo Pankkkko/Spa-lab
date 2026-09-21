@@ -47,19 +47,32 @@ public class SecurityConfig {
             .cors(Customizer.withDefaults())
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // GET permitidos
-                .requestMatchers(HttpMethod.GET, "/api/data").hasAuthority("SCOPE_access_as_user")
-                .requestMatchers(HttpMethod.GET, "/api/clientes/**").hasAuthority("SCOPE_access_as_user")
-                .requestMatchers(HttpMethod.GET, "/api/pedidos/**").hasAuthority("SCOPE_access_as_user")
-                // POST permitidos
-                .requestMatchers(HttpMethod.POST, "/api/clientes").hasAuthority("SCOPE_access_as_user")
-                .requestMatchers(HttpMethod.POST, "/api/pedidos").hasAuthority("SCOPE_access_as_user")
-                // PUT permitidos
-                .requestMatchers(HttpMethod.PUT, "/api/clientes/**").hasAuthority("SCOPE_access_as_user")
-                .requestMatchers(HttpMethod.PUT, "/api/pedidos/**").hasAuthority("SCOPE_access_as_user")
-                // DELETE permitidos
-                .requestMatchers(HttpMethod.DELETE, "/api/clientes/**").hasAuthority("SCOPE_access_as_user")
-                .requestMatchers(HttpMethod.DELETE, "/api/pedidos/**").hasAuthority("SCOPE_access_as_user")
+                // ============ GET: requiere pedidos.read ============
+                .requestMatchers(HttpMethod.GET, "/api/data")
+                    .hasAuthority("SCOPE_pedidos.read")
+                .requestMatchers(HttpMethod.GET, "/api/clientes/**")
+                    .hasAuthority("SCOPE_pedidos.read")
+                .requestMatchers(HttpMethod.GET, "/api/pedidos/**")
+                    .hasAuthority("SCOPE_pedidos.read")
+
+                // ============ POST: requiere pedidos.write ============
+                .requestMatchers(HttpMethod.POST, "/api/clientes")
+                    .hasAuthority("SCOPE_pedidos.write")
+                .requestMatchers(HttpMethod.POST, "/api/pedidos")
+                    .hasAuthority("SCOPE_pedidos.write")
+
+                // ============ PUT: requiere pedidos.write ============
+                .requestMatchers(HttpMethod.PUT, "/api/clientes/**")
+                    .hasAuthority("SCOPE_pedidos.write")
+                .requestMatchers(HttpMethod.PUT, "/api/pedidos/**")
+                    .hasAuthority("SCOPE_pedidos.write")
+
+                // ============ DELETE: requiere pedidos.write ============
+                .requestMatchers(HttpMethod.DELETE, "/api/clientes/**")
+                    .hasAuthority("SCOPE_pedidos.write")
+                .requestMatchers(HttpMethod.DELETE, "/api/pedidos/**")
+                    .hasAuthority("SCOPE_pedidos.write")
+
                 // Todo lo demás denegado
                 .anyRequest().denyAll()
             )
