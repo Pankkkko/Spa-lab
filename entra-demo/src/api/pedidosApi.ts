@@ -5,7 +5,7 @@ IPublicClientApplication,
 
 import { obtenerToken } from '../token';
 
-const PEDIDOS_BASE_URL = 'http://localhost:8082';
+const PEDIDOS_BASE_URL = import.meta.env.VITE_BFF_BASE_URL;;
 
 export interface PedidoDetalle {
 producto: string;

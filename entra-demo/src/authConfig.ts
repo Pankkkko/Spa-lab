@@ -6,8 +6,7 @@ export const msalConfig: Configuration = {
     authority:
       'https://login.microsoftonline.com/' +
       import.meta.env.VITE_ENTRA_TENANT_ID,
-    redirectUri:
-      window.location.origin + '/redirect.html',
+    redirectUri: window.location.origin + '/redirect.html',
     postLogoutRedirectUri: window.location.origin,
   },
   cache: {
@@ -17,7 +16,7 @@ export const msalConfig: Configuration = {
 
 export const tokenRequest = {
   scopes: [
-    `api://${import.meta.env.VITE_API_CLIENT_ID}/pedidos.read`,
-    `api://${import.meta.env.VITE_API_CLIENT_ID}/pedidos.write`,
+    'api://fa47563a-a68d-4d29-93c1-64bbfab52085/pedidos.read',
+    'api://fa47563a-a68d-4d29-93c1-64bbfab52085/pedidos.write',
   ],
 };

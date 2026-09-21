@@ -1,28 +1,23 @@
-
 import { createRoot } from 'react-dom/client';
 import { PublicClientApplication } from '@azure/msal-browser';
 import { MsalProvider } from '@azure/msal-react';
-
 import { msalConfig } from './authConfig';
 import App from './App';
 
-async function main() {
-  const msal = new PublicClientApplication(msalConfig);
+const msalInstance = new PublicClientApplication(msalConfig);
 
-  await msal.initialize();
+// 👇 EXPONER MSAL GLOBALMENTE (solo para desarrollo)
+(window as any).msalInstance = msalInstance;
 
+msalInstance.initialize().then(() => {
   const rootElement = document.getElementById('root');
-
   if (!rootElement) {
     throw new Error('Root element not found');
   }
 
   createRoot(rootElement).render(
-    <MsalProvider instance={msal}>
+    <MsalProvider instance={msalInstance}>
       <App />
     </MsalProvider>,
   );
-}
-
-void main();
-
+});
