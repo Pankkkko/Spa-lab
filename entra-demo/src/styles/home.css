@@ -282,3 +282,256 @@ background: rgba(255, 255, 255, 0.7);
 color: #8a3030;
 font-size: 0.9rem;
 }
+
+/* =========================================================
+   BIENVENIDA DEL USUARIO
+   ========================================================= */
+
+.user-welcome {
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 1.5rem;
+    padding: 1.2rem 1.4rem;
+    border-radius: 14px;
+    background: rgba(207, 240, 234, 0.55);
+    border: 1px solid rgba(62, 155, 148, 0.2);
+}
+
+.user-welcome-label {
+    display: block;
+    color: #3E9B94;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.user-welcome h2 {
+    margin: 0.25rem 0 0;
+    color: #0C3B45;
+    font-size: 1.4rem;
+}
+
+.user-welcome p {
+    margin: 0.25rem 0 0;
+    color: #20666B;
+    font-size: 0.85rem;
+    word-break: break-word;
+}
+
+
+/* =========================================================
+   PREVIEW DE PEDIDOS
+   ========================================================= */
+
+.orders-preview {
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 1.5rem;
+    padding: 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    border-radius: 16px;
+    background: #ffffff;
+    border: 1px solid rgba(62, 155, 148, 0.2);
+    box-shadow: 0 5px 16px rgba(12, 59, 69, 0.05);
+}
+
+.orders-preview-label {
+    display: block;
+    color: #3E9B94;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.orders-preview h2 {
+    margin: 0.2rem 0 0;
+    color: #0C3B45;
+    font-size: 1.25rem;
+}
+
+.orders-preview p {
+    margin: 0.35rem 0 0;
+    color: #20666B;
+    font-size: 0.85rem;
+}
+
+.orders-open-button {
+    flex-shrink: 0;
+    border: none;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    background: #20666B;
+    color: #ffffff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.orders-open-button:hover {
+    background: #0C3B45;
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   MODAL DE PEDIDOS
+   ========================================================= */
+
+.orders-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 1.5rem;
+    box-sizing: border-box;
+
+    background: rgba(12, 59, 69, 0.55);
+    backdrop-filter: blur(3px);
+}
+
+.orders-modal {
+    width: min(720px, 100%);
+    max-height: 85vh;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
+
+    background: #ffffff;
+    border-radius: 18px;
+    border: 1px solid rgba(62, 155, 148, 0.25);
+
+    box-shadow: 0 20px 50px rgba(12, 59, 69, 0.2);
+}
+
+.orders-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+
+    padding: 1.3rem 1.5rem;
+
+    border-bottom: 1px solid rgba(32, 102, 107, 0.12);
+}
+
+.orders-modal-label {
+    display: block;
+    color: #3E9B94;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+}
+
+.orders-modal-header h2 {
+    margin: 0.2rem 0 0;
+    color: #0C3B45;
+    font-size: 1.4rem;
+}
+
+.orders-modal-close {
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 50%;
+
+    background: #CFF0EA;
+    color: #20666B;
+
+    font-size: 1.5rem;
+    line-height: 1;
+
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        color 0.2s ease;
+}
+
+.orders-modal-close:hover {
+    background: #88C9C4;
+    color: #0C3B45;
+}
+
+.orders-modal-content {
+    padding: 1.2rem 1.5rem;
+    overflow-y: auto;
+}
+
+.orders-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+
+    padding: 1rem 1.5rem;
+
+    border-top: 1px solid rgba(32, 102, 107, 0.12);
+}
+
+.orders-modal-footer-button {
+    border: none;
+    border-radius: 10px;
+    padding: 0.65rem 1rem;
+
+    background: #CFF0EA;
+    color: #20666B;
+
+    font: inherit;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+.orders-modal-footer-button:hover {
+    background: #88C9C4;
+    color: #0C3B45;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+    .orders-preview {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .orders-open-button {
+        width: 100%;
+    }
+
+    .orders-modal-overlay {
+        padding: 0.75rem;
+    }
+
+    .orders-modal {
+        max-height: 90vh;
+    }
+
+    .orders-modal-header,
+    .orders-modal-content,
+    .orders-modal-footer {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+

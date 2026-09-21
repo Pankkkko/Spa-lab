@@ -3,7 +3,12 @@ import { useMsal } from "@azure/msal-react";
 
 import HomeWelcome from "../components/HomeWelcome";
 import HomeAction from "../components/HomeAction";
-import TokenDebugButton from "../components/TokenDebugButton";
+import OrdersModal from "../components/OrdersModal";
+
+// 🔧 Debug de evaluación.
+// Se mantiene importado para poder reactivarlo rápidamente más adelante.
+// import TokenDebugButton from "../components/TokenDebugButton";
+
 import { obtenerPedidos } from "../api/pedidosApi";
 import type { Pedido } from "../api/pedidosApi";
 
@@ -26,6 +31,11 @@ function HomePage({
     const [cargandoPedidos, setCargandoPedidos] = useState(false);
     const [errorPedidos, setErrorPedidos] = useState("");
 
+    const [mostrarPedidos, setMostrarPedidos] = useState(false);
+
+    const account =
+        instance.getActiveAccount() ?? accounts[0];
+
     useEffect(() => {
         if (!isAuthenticated) {
             setPedidos([]);
@@ -33,9 +43,10 @@ function HomePage({
             return;
         }
 
-        const account = instance.getActiveAccount() ?? accounts[0];
+        const cuentaActual =
+            instance.getActiveAccount() ?? accounts[0];
 
-        if (!account) {
+        if (!cuentaActual) {
             return;
         }
 
@@ -46,13 +57,16 @@ function HomePage({
             try {
                 const resultado = await obtenerPedidos(
                     instance,
-                    account,
+                    cuentaActual,
                     1,
                 );
 
                 setPedidos(resultado);
             } catch (error) {
-                console.error("Error al cargar pedidos:", error);
+                console.error(
+                    "Error al cargar pedidos:",
+                    error,
+                );
 
                 setErrorPedidos(
                     error instanceof Error
@@ -67,10 +81,45 @@ function HomePage({
         void cargarPedidos();
     }, [isAuthenticated, instance, accounts]);
 
+    function abrirPedidos() {
+        setMostrarPedidos(true);
+    }
+
+    function cerrarPedidos() {
+        setMostrarPedidos(false);
+    }
+
+    const nombreUsuario =
+        account?.name ??
+        account?.username ??
+        "Cliente";
+
+    const username =
+        account?.username ?? "";
+
     return (
         <main className="home-page">
             <section className="home-card">
+
                 <HomeWelcome />
+
+                {isAuthenticated && account && (
+                    <section className="user-welcome">
+                        <span className="user-welcome-label">
+                            Bienvenido/a
+                        </span>
+
+                        <h2>
+                            {nombreUsuario}
+                        </h2>
+
+                        {username && (
+                            <p>
+                                {username}
+                            </p>
+                        )}
+                    </section>
+                )}
 
                 <HomeAction
                     isAuthenticated={isAuthenticated}
@@ -78,110 +127,59 @@ function HomePage({
                     onLogout={onLogout}
                 />
 
-                {/* 🔧 Botón temporal para copiar el token al portapapeles */}
-                {isAuthenticated && <TokenDebugButton />}
+                {/*
+                    🔧 Botón temporal de debug.
+
+                    NO ELIMINAR.
+                    Para la evaluación 2, descomentar:
+
+                    import TokenDebugButton from "../components/TokenDebugButton";
+
+                    y luego:
+
+                    {isAuthenticated && <TokenDebugButton />}
+                */}
 
                 {isAuthenticated && (
-                    <section className="orders-section">
-                        <div className="orders-header">
-                            <h2>Mis pedidos</h2>
+                    <section className="orders-preview">
+                        <div className="orders-preview-content">
+                            <span className="orders-preview-label">
+                                Tu cuenta
+                            </span>
+
+                            <h2>
+                                Mis pedidos
+                            </h2>
 
                             <p>
-                                Estos son los pedidos asociados a tu cuenta.
+                                Consulta el estado y los detalles
+                                de tus compras.
                             </p>
                         </div>
 
-                        {cargandoPedidos && (
-                            <p className="orders-message">
-                                Cargando pedidos...
-                            </p>
-                        )}
-
-                        {errorPedidos && (
-                            <p className="orders-error">
-                                {errorPedidos}
-                            </p>
-                        )}
-
-                        {!cargandoPedidos &&
-                            !errorPedidos &&
-                            pedidos.length === 0 && (
-                                <p className="orders-message">
-                                    No tienes pedidos registrados.
-                                </p>
-                            )}
-
-                        {!cargandoPedidos &&
-                            !errorPedidos &&
-                            pedidos.length > 0 && (
-                                <div className="orders-list">
-                                    {pedidos.map((pedido) => (
-                                        <article
-                                            className="order-card"
-                                            key={pedido.id}
-                                        >
-                                            <div className="order-card-header">
-                                                <div>
-                                                    <span className="order-label">
-                                                        Pedido
-                                                    </span>
-
-                                                    <h3>
-                                                        #{pedido.id}
-                                                    </h3>
-                                                </div>
-
-                                                <span
-                                                    className={`order-status status-${pedido.estado.toLowerCase()}`}
-                                                >
-                                                    {pedido.estado}
-                                                </span>
-                                            </div>
-
-                                            <div className="order-info">
-                                                <span>
-                                                    Fecha: {pedido.fecha}
-                                                </span>
-
-                                                <strong>
-                                                    ${pedido.total.toLocaleString(
-                                                        "es-CL",
-                                                    )}
-                                                </strong>
-                                            </div>
-
-                                            <div className="order-details">
-                                                {pedido.detalles.map(
-                                                    (detalle, index) => (
-                                                        <div
-                                                            className="order-detail"
-                                                            key={`${pedido.id}-${index}`}
-                                                        >
-                                                            <span>
-                                                                {detalle.producto}
-                                                                {" x"}
-                                                                {detalle.cantidad}
-                                                            </span>
-
-                                                            <span>
-                                                                $
-                                                                {detalle.subtotal.toLocaleString(
-                                                                    "es-CL",
-                                                                )}
-                                                            </span>
-                                                        </div>
-                                                    ),
-                                                )}
-                                            </div>
-                                        </article>
-                                    ))}
-                                </div>
-                            )}
+                        <button
+                            className="orders-open-button"
+                            onClick={abrirPedidos}
+                            type="button"
+                        >
+                            Ver mis pedidos
+                        </button>
                     </section>
                 )}
             </section>
+
+            {isAuthenticated && (
+                <OrdersModal
+                    isOpen={mostrarPedidos}
+                    onClose={cerrarPedidos}
+                    pedidos={pedidos}
+                    cargando={cargandoPedidos}
+                    error={errorPedidos}
+                />
+            )}
         </main>
     );
 }
 
 export default HomePage;
+
