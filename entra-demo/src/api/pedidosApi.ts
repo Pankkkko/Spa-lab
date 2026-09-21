@@ -5,7 +5,7 @@ IPublicClientApplication,
 
 import { obtenerToken } from '../token';
 
-const PEDIDOS_BASE_URL = import.meta.env.VITE_BFF_BASE_URL;;
+const BFF_BASE_URL = 'http://localhost:8080';
 
 export interface PedidoDetalle {
 producto: string;
@@ -37,7 +37,7 @@ if (!result.accessToken) {
 }
 
 const response = await fetch(
-    `${PEDIDOS_BASE_URL}/api/pedidos/cliente/${clienteId}`,
+    `${BFF_BASE_URL}/api/pedidos/cliente/${clienteId}`,
     {
         method: 'GET',
         headers: {
@@ -51,7 +51,7 @@ const body = await response.text();
 
 if (!response.ok) {
     throw new Error(
-        `Error al obtener pedidos. HTTP ${response.status}: ${body}`,
+        `Error al obtener pedidos desde el BFF. HTTP ${response.status}: ${body}`,
     );
 }
 
