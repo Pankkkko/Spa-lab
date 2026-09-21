@@ -1,44 +1,112 @@
 package cl.duoc.mspedidos.service;
 
-import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 import cl.duoc.mspedidos.dto.PedidoDetalleResponse;
 import cl.duoc.mspedidos.dto.PedidoResponse;
+import cl.duoc.mspedidos.entity.Pedido;
+import cl.duoc.mspedidos.entity.PedidoDetalle;
+import cl.duoc.mspedidos.repository.PedidoRepository;
 
 @Service
 public class PedidoService {
 
+    private final PedidoRepository pedidoRepository;
+
+    public PedidoService(PedidoRepository pedidoRepository) {
+        this.pedidoRepository = pedidoRepository;
+    }
+
+    // GET por cliente
     public List<PedidoResponse> buscarPorCliente(Long clienteId) {
-        List<PedidoDetalleResponse> detalles1 = List.of(
-            new PedidoDetalleResponse("Notebook Lenovo", 1, 749990.0, 749990.0),
-            new PedidoDetalleResponse("Mouse Logitech", 2, 29990.0, 59980.0)
-        );
+        return pedidoRepository.findByClienteId(clienteId).stream()
+            .map(this::toResponse)
+            .collect(Collectors.toList());
+    }
 
-        List<PedidoDetalleResponse> detalles2 = List.of(
-            new PedidoDetalleResponse("Teclado Mecánico", 1, 89990.0, 89990.0)
-        );
+    // GET por ID
+    public PedidoResponse buscarPorId(Long id) {
+        Pedido pedido = pedidoRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Pedido no encontrado: " + id));
+        return toResponse(pedido);
+    }
 
-        List<PedidoDetalleResponse> detalles3 = List.of(
-            new PedidoDetalleResponse("Monitor 24\"", 1, 149990.0, 149990.0),
-            new PedidoDetalleResponse("Cable HDMI", 1, 7990.0, 7990.0)
-        );
+    // GET todos
+    public List<PedidoResponse> listarPedidos() {
+        return pedidoRepository.findAll().stream()
+            .map(this::toResponse)
+            .collect(Collectors.toList());
+    }
 
-        return List.of(
-            new PedidoResponse(1L, clienteId, "Wacoldo Soto", "ENVIADO",
-                LocalDate.of(2026, 9, 1),
-                detalles1.stream().mapToDouble(PedidoDetalleResponse::subtotal).sum(),
-                detalles1),
-            new PedidoResponse(2L, clienteId, "Wacoldo Soto", "ENTREGADO",
-                LocalDate.of(2026, 8, 15),
-                detalles2.stream().mapToDouble(PedidoDetalleResponse::subtotal).sum(),
-                detalles2),
-            new PedidoResponse(3L, clienteId, "Wacoldo Soto", "PENDIENTE",
-                LocalDate.of(2026, 9, 12),
-                detalles3.stream().mapToDouble(PedidoDetalleResponse::subtotal).sum(),
-                detalles3)
+    // POST
+    public PedidoResponse agregarPedido(PedidoResponse request) {
+        Pedido pedido = new Pedido(request.clienteId(), request.estado(), request.fecha());
+        if (request.detalles() != null) {
+            for (PedidoDetalleResponse d : request.detalles()) {
+                PedidoDetalle detalle = new PedidoDetalle(d.producto(), d.cantidad(), d.precioUnitario());
+                pedido.agregarDetalle(detalle);
+            }
+        }
+        Pedido guardado = pedidoRepository.save(pedido);
+        return toResponse(guardado);
+    }
+
+    // PUT
+    public PedidoResponse editarPedido(Long id, PedidoResponse request) {
+        Pedido pedido = pedidoRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Pedido no encontrado: " + id));
+
+        pedido.setClienteId(request.clienteId());
+        pedido.setEstado(request.estado());
+        pedido.setFecha(request.fecha());
+
+        // Reemplazar detalles (orphanRemoval=true borra los viejos)
+        pedido.getDetalles().clear();
+        if (request.detalles() != null) {
+            for (PedidoDetalleResponse d : request.detalles()) {
+                PedidoDetalle detalle = new PedidoDetalle(d.producto(), d.cantidad(), d.precioUnitario());
+                pedido.agregarDetalle(detalle);
+            }
+        }
+
+        Pedido actualizado = pedidoRepository.save(pedido);
+        return toResponse(actualizado);
+    }
+
+    // DELETE
+    public void eliminarPedido(Long id) {
+        if (!pedidoRepository.existsById(id)) {
+            throw new RuntimeException("Pedido no encontrado: " + id);
+        }
+        pedidoRepository.deleteById(id);
+    }
+
+    // Mapper entidad -> DTO
+    private PedidoResponse toResponse(Pedido p) {
+        List<PedidoDetalleResponse> detalles = p.getDetalles().stream()
+            .map(d -> new PedidoDetalleResponse(
+                d.getProducto(),
+                d.getCantidad(),
+                d.getPrecioUnitario(),
+                d.getSubtotal()
+            ))
+            .collect(Collectors.toList());
+
+        Double total = detalles.stream()
+            .mapToDouble(PedidoDetalleResponse::subtotal)
+            .sum();
+
+        return new PedidoResponse(
+            p.getId(),
+            p.getClienteId(),
+            null, // clienteNombre se enriquece en el BFF
+            p.getEstado(),
+            p.getFecha(),
+            total,
+            detalles
         );
     }
 }
