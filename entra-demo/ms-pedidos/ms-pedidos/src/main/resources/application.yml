@@ -5,9 +5,9 @@ spring:
   application:
     name: ms-pedidos
   datasource:
-    url: jdbc:mysql://localhost:3306/db_pedidos?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
-    username: root
-    password:
+    url: jdbc:mysql://pedidos360-pedidos.cubftnqdncaw.us-east-1.rds.amazonaws.com:3306/db_pedidos?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+    username: admin
+    password: Plutonio987
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:

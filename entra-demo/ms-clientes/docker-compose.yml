@@ -1,0 +1,13 @@
+services:
+  ms-clientes:
+    build:
+      context: ./ms-clientes
+      dockerfile: Dockerfile
+    container_name: ms-clientes
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:mysql://p360-clientes.cubftnqdncaw.us-east-1.rds.amazonaws.com:3306/db_clientes?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
+      SPRING_DATASOURCE_USERNAME: "admin"
+      SPRING_DATASOURCE_PASSWORD: "Plutonio987"
+    restart: unless-stopped

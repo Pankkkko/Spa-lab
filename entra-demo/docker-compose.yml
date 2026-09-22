@@ -1,65 +1,4 @@
 services:
-  # ============================================
-  # MICROSERVICIO: ms-clientes (puerto 8081)
-  # ============================================
-  ms-clientes:
-    build:
-      context: ./ms-clientes
-      dockerfile: Dockerfile
-    container_name: ms-clientes
-    ports:
-      - "8081:8081"
-    environment:
-      SPRING_DATASOURCE_URL: "jdbc:mysql://TU-RDS-ENDPOINT.rds.amazonaws.com:3306/db_clientes?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
-      SPRING_DATASOURCE_USERNAME: "admin"
-      SPRING_DATASOURCE_PASSWORD: "TU_PASSWORD_RDS"
-    networks:
-      - pedidos-net
-    restart: unless-stopped
-
-  # ============================================
-  # MICROSERVICIO: ms-pedidos (puerto 8082)
-  # ============================================
-  ms-pedidos:
-    build:
-      context: ./ms-pedidos
-      dockerfile: Dockerfile
-    container_name: ms-pedidos
-    ports:
-      - "8082:8082"
-    environment:
-      SPRING_DATASOURCE_URL: "jdbc:mysql://TU-RDS-ENDPOINT.rds.amazonaws.com:3306/db_pedidos?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
-      SPRING_DATASOURCE_USERNAME: "admin"
-      SPRING_DATASOURCE_PASSWORD: "TU_PASSWORD_RDS"
-    networks:
-      - pedidos-net
-    restart: unless-stopped
-
-  # ============================================
-  # BFF: api (puerto 8080)
-  # ============================================
-  api-bff:
-    build:
-      context: ./api
-      dockerfile: Dockerfile
-    container_name: api-bff
-    ports:
-      - "8080:8080"
-    environment:
-      ENTRA_ISSUER_URI: "https://login.microsoftonline.com/49551105-7651-4748-a01b-22b28daeb087/v2.0"
-      ENTRA_API_CLIENT_ID: "fa47563a-a68d-4d29-93c1-64bbfab52085"
-      MS_CLIENTES_URL: "http://ms-clientes:8081"
-      MS_PEDIDOS_URL: "http://ms-pedidos:8082"
-    depends_on:
-      - ms-clientes
-      - ms-pedidos
-    networks:
-      - pedidos-net
-    restart: unless-stopped
-
-  # ============================================
-  # FRONTEND: entra-demo (puerto 80)
-  # ============================================
   entra-demo:
     build:
       context: ./entra-demo
@@ -68,16 +7,8 @@ services:
         VITE_ENTRA_TENANT_ID: "49551105-7651-4748-a01b-22b28daeb087"
         VITE_SPA_CLIENT_ID: "ab423fd9-e85e-4838-85f1-30521dacdaf7"
         VITE_API_CLIENT_ID: "fa47563a-a68d-4d29-93c1-64bbfab52085"
-        VITE_BFF_BASE_URL: "http://TU-IP-PUBLICA-EC2:8080"
+        VITE_BFF_BASE_URL: "http://54.147.242.194:8080"  # ← IP pública del BFF
     container_name: entra-demo
     ports:
       - "80:80"
-    depends_on:
-      - api-bff
-    networks:
-      - pedidos-net
     restart: unless-stopped
-
-networks:
-  pedidos-net:
-    driver: bridge

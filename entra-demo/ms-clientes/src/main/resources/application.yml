@@ -5,9 +5,9 @@ spring:
   application:
     name: ms-clientes
   datasource:
-    url: jdbc:mysql://localhost:3306/db_clientes?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
-    username: root
-    password:
+    url: jdbc:mysql://p360-clientes.cubftnqdncaw.us-east-1.rds.amazonaws.com:3306/db_clientes?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+    username: admin
+    password: Plutonio987
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:

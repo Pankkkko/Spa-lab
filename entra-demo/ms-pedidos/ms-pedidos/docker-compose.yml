@@ -1,0 +1,13 @@
+services:
+  ms-pedidos:
+    build:
+      context: ./ms-pedidos
+      dockerfile: Dockerfile
+    container_name: ms-pedidos
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:mysql://pedidos360-pedidos.cubftnqdncaw.us-east-1.rds.amazonaws.com:3306/db_pedidos?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
+      SPRING_DATASOURCE_USERNAME: "admin"
+      SPRING_DATASOURCE_PASSWORD: "Plutonio987"
+    restart: unless-stopped
