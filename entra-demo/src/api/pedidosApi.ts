@@ -5,7 +5,7 @@ IPublicClientApplication,
 
 import { obtenerToken } from '../token';
 
-const BFF_BASE_URL = 'http://localhost:8080';
+const BFF_BASE_URL = 'https://tmbul2u2ic.execute-api.us-east-1.amazonaws.com/lanzar';
 
 export interface PedidoDetalle {
 producto: string;
@@ -30,14 +30,15 @@ account: AccountInfo,
 clienteId: number,
 ): Promise<Pedido[]> {
 const result = await obtenerToken(instance, account);
-
+console.log('Cuenta:', account.username);
+console.log('Token:', result.accessToken);
 
 if (!result.accessToken) {
     throw new Error('No se obtuvo access token');
 }
 
 const response = await fetch(
-    `${BFF_BASE_URL}/api/pedidos/cliente/${clienteId}`,
+    `${BFF_BASE_URL}/pedidos/cliente/${clienteId}`,
     {
         method: 'GET',
         headers: {

@@ -5,7 +5,7 @@ import type {
 
 import { obtenerToken } from '../token';
 
-const BFF_BASE_URL = 'http://localhost:8080';
+const BFF_BASE_URL = 'https://tmbul2u2ic.execute-api.us-east-1.amazonaws.com/lanzar';
 
 export interface Cliente {
     id: number;
@@ -42,7 +42,7 @@ export async function obtenerClientes(
     }
 
     const response = await fetch(
-        `${BFF_BASE_URL}/api/clientes`,
+        `${BFF_BASE_URL}/clientes`,
         {
             method: 'GET',
             headers: {
@@ -74,7 +74,7 @@ export async function obtenerTodosLosPedidos(
     }
 
     const response = await fetch(
-        `${BFF_BASE_URL}/api/pedidos`,
+        `${BFF_BASE_URL}/pedidos`,
         {
             method: 'GET',
             headers: {
