@@ -1,6 +1,7 @@
 package cl.duoc.mspedidos.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -65,5 +66,14 @@ public class PedidoController {
     public ResponseEntity<Void> eliminarPedido(@PathVariable Long id) {
         pedidoService.eliminarPedido(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<PedidoResponse> cambiarEstado(
+        @PathVariable Long id,
+        @RequestBody Map<String, String> body
+    ) {
+        String nuevoEstado = body.get("status");
+        return ResponseEntity.ok(pedidoService.cambiarEstado(id, nuevoEstado));
     }
 }

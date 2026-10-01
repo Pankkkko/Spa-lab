@@ -1,72 +1,94 @@
 package cl.duoc.mspedidos.service;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-
 import cl.duoc.mspedidos.dto.PedidoDetalleResponse;
+import cl.duoc.mspedidos.dto.PedidoEvento;
 import cl.duoc.mspedidos.dto.PedidoResponse;
 import cl.duoc.mspedidos.entity.Pedido;
 import cl.duoc.mspedidos.entity.PedidoDetalle;
 import cl.duoc.mspedidos.repository.PedidoRepository;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PedidoService {
 
     private final PedidoRepository pedidoRepository;
+    private final RabbitTemplate rabbitTemplate;
 
-    public PedidoService(PedidoRepository pedidoRepository) {
+    public PedidoService(PedidoRepository pedidoRepository, RabbitTemplate rabbitTemplate) {
         this.pedidoRepository = pedidoRepository;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
-    // GET por cliente
-    public List<PedidoResponse> buscarPorCliente(Long clienteId) {
-        return pedidoRepository.findByClienteId(clienteId).stream()
-            .map(this::toResponse)
-            .collect(Collectors.toList());
+    public PedidoResponse agregarPedido(PedidoResponse request) {
+        Pedido pedido = new Pedido(request.clienteId(), "CREADO", LocalDate.now());
+        if (request.detalles() != null) {
+            for (var d : request.detalles()) {
+                pedido.agregarDetalle(new PedidoDetalle(d.producto(), d.cantidad(), d.precioUnitario()));
+            }
+        }
+
+        Pedido guardado = pedidoRepository.save(pedido);
+
+        PedidoEvento evento = PedidoEvento.of("OrderCreated", guardado.getId(), "CREADO");
+        rabbitTemplate.convertAndSend("cmd.direct", "email.send", evento);
+        rabbitTemplate.convertAndSend("cmd.direct", "kitchen.ticket", evento);
+        rabbitTemplate.convertAndSend("cmd.direct", "invoice.gen", evento);
+
+        return toResponse(guardado);
     }
 
-    // GET por ID
+    public PedidoResponse cambiarEstado(Long id, String nuevoEstado) {
+        Pedido pedido = pedidoRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Pedido no encontrado: " + id));
+
+        String estadoActual = pedido.getEstado();
+        if ("DESPACHADO".equals(nuevoEstado) && !"ACEPTADO".equals(estadoActual)) {
+            throw new RuntimeException("No se puede despachar sin aceptar");
+        }
+
+        pedido.setEstado(nuevoEstado);
+        Pedido actualizado = pedidoRepository.save(pedido);
+
+        PedidoEvento evento = PedidoEvento.of("Order" + nuevoEstado, actualizado.getId(), nuevoEstado);
+        rabbitTemplate.convertAndSend("cmd.topic", "kitchen.ticket", evento);
+
+        return toResponse(actualizado);
+    }
+
     public PedidoResponse buscarPorId(Long id) {
         Pedido pedido = pedidoRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Pedido no encontrado: " + id));
         return toResponse(pedido);
     }
 
-    // GET todos
     public List<PedidoResponse> listarPedidos() {
         return pedidoRepository.findAll().stream()
             .map(this::toResponse)
             .collect(Collectors.toList());
     }
 
-    // POST
-    public PedidoResponse agregarPedido(PedidoResponse request) {
-        Pedido pedido = new Pedido(request.clienteId(), request.estado(), request.fecha());
-        if (request.detalles() != null) {
-            for (PedidoDetalleResponse d : request.detalles()) {
-                PedidoDetalle detalle = new PedidoDetalle(d.producto(), d.cantidad(), d.precioUnitario());
-                pedido.agregarDetalle(detalle);
-            }
-        }
-        Pedido guardado = pedidoRepository.save(pedido);
-        return toResponse(guardado);
+    public List<PedidoResponse> buscarPorCliente(Long clienteId) {
+        return pedidoRepository.findByClienteId(clienteId).stream()
+            .map(this::toResponse)
+            .collect(Collectors.toList());
     }
 
-    // PUT
     public PedidoResponse editarPedido(Long id, PedidoResponse request) {
         Pedido pedido = pedidoRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Pedido no encontrado: " + id));
 
         pedido.setClienteId(request.clienteId());
         pedido.setEstado(request.estado());
-        pedido.setFecha(request.fecha());
+        pedido.setFecha(request.fecha() != null ? request.fecha() : LocalDate.now());
 
-        // Reemplazar detalles (orphanRemoval=true borra los viejos)
         pedido.getDetalles().clear();
         if (request.detalles() != null) {
-            for (PedidoDetalleResponse d : request.detalles()) {
+            for (var d : request.detalles()) {
                 PedidoDetalle detalle = new PedidoDetalle(d.producto(), d.cantidad(), d.precioUnitario());
                 pedido.agregarDetalle(detalle);
             }
@@ -76,37 +98,27 @@ public class PedidoService {
         return toResponse(actualizado);
     }
 
-    // DELETE
     public void eliminarPedido(Long id) {
-        if (!pedidoRepository.existsById(id)) {
-            throw new RuntimeException("Pedido no encontrado: " + id);
-        }
-        pedidoRepository.deleteById(id);
+        Pedido pedido = pedidoRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Pedido no encontrado: " + id));
+        pedidoRepository.delete(pedido);
     }
 
-    // Mapper entidad -> DTO
-    private PedidoResponse toResponse(Pedido p) {
-        List<PedidoDetalleResponse> detalles = p.getDetalles().stream()
-            .map(d -> new PedidoDetalleResponse(
-                d.getProducto(),
-                d.getCantidad(),
-                d.getPrecioUnitario(),
-                d.getSubtotal()
-            ))
-            .collect(Collectors.toList());
-
-        Double total = detalles.stream()
-            .mapToDouble(PedidoDetalleResponse::subtotal)
-            .sum();
-
+    private PedidoResponse toResponse(Pedido pedido) {
         return new PedidoResponse(
-            p.getId(),
-            p.getClienteId(),
-            null, // clienteNombre se enriquece en el BFF
-            p.getEstado(),
-            p.getFecha(),
-            total,
-            detalles
+            pedido.getId(),
+            pedido.getClienteId(),
+            null,
+            pedido.getEstado(),
+            pedido.getFecha(),
+            pedido.getDetalles().stream().mapToDouble(PedidoDetalle::getSubtotal).sum(),
+            pedido.getDetalles().stream()
+                .map(detalle -> new PedidoDetalleResponse(
+                    detalle.getProducto(),
+                    detalle.getCantidad(),
+                    detalle.getPrecioUnitario(),
+                    detalle.getSubtotal()))
+                .collect(Collectors.toList())
         );
     }
 }

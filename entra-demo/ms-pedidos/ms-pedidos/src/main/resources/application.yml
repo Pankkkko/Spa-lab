@@ -3,9 +3,9 @@ server:
 
 spring:
   application:
-    name: ms-pedidos
+    name: ms-pedidos360-orders
   datasource:
-    url: jdbc:mysql://pedidos360-pedidos.cubftnqdncaw.us-east-1.rds.amazonaws.com:3306/db_pedidos?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://pedidos360-pedidos.cubftnqdncaw.us-east-1.rds.amazonaws.com:3306/db_pedidos?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: admin
     password: Plutonio987
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -13,7 +13,9 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
     database-platform: org.hibernate.dialect.MySQLDialect
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: 5672
+    username: ${RABBITMQ_USER:admin}
+    password: ${RABBITMQ_PASS:admin123}
