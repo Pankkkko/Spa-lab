@@ -13,6 +13,7 @@ public class ProductoFactory {
         producto.setPrecio(dto.getPrecio());
         producto.setCategoria(dto.getCategoria());
         producto.setImagenes(dto.getImagenes());
+        producto.setStock(dto.getStock());
         return producto;
     }
 }

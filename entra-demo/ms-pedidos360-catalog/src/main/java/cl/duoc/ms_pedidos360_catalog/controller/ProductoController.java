@@ -35,16 +35,20 @@ public class ProductoController {
             @Valid @RequestBody ProductoRequestDTO dto
     ) {
 
-        return ResponseEntity.status(HttpStatus.CREATED)
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
                 .body(service.crearProducto(dto));
     }
+
     @GetMapping
     public ResponseEntity<Page<ProductoResponseDTO>> listar(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
 
-        return ResponseEntity.ok(service.listarProductos(page, size));
+        return ResponseEntity.ok(
+            service.listarProductos(page, size)
+        );
     }
 
     @GetMapping("/{sku}")
@@ -52,8 +56,21 @@ public class ProductoController {
             @PathVariable String sku
     ) {
 
-        return ResponseEntity.ok(service.obtenerPorSku(sku));
+        return ResponseEntity.ok(
+            service.obtenerPorSku(sku)
+        );
     }
+
+    @GetMapping("/{sku}/stock")
+    public ResponseEntity<Integer> obtenerStock(
+            @PathVariable String sku
+    ) {
+
+        return ResponseEntity.ok(
+            service.obtenerStock(sku)
+        );
+    }
+
     @GetMapping("/buscar/nombre")
     public ResponseEntity<Page<ProductoResponseDTO>> buscarPorNombre(
             @RequestParam String nombre,
@@ -62,7 +79,7 @@ public class ProductoController {
     ) {
 
         return ResponseEntity.ok(
-                service.buscarPorNombre(nombre, page, size)
+            service.buscarPorNombre(nombre, page, size)
         );
     }
 
@@ -74,7 +91,7 @@ public class ProductoController {
     ) {
 
         return ResponseEntity.ok(
-                service.buscarPorCategoria(categoria, page, size)
+            service.buscarPorCategoria(categoria, page, size)
         );
     }
 
@@ -87,7 +104,7 @@ public class ProductoController {
     ) {
 
         return ResponseEntity.ok(
-                service.buscarPorPrecio(min, max, page, size)
+            service.buscarPorPrecio(min, max, page, size)
         );
     }
 
@@ -97,7 +114,20 @@ public class ProductoController {
             @Valid @RequestBody ProductoRequestDTO dto
     ) {
 
-        return ResponseEntity.ok(service.actualizar(sku, dto));
+        return ResponseEntity.ok(
+            service.actualizar(sku, dto)
+        );
+    }
+
+    @PutMapping("/{sku}/stock")
+    public ResponseEntity<Integer> actualizarStock(
+            @PathVariable String sku,
+            @RequestBody Integer stock
+    ) {
+
+        return ResponseEntity.ok(
+            service.actualizarStock(sku, stock)
+        );
     }
 
     @DeleteMapping("/{sku}")

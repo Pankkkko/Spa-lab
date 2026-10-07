@@ -5,7 +5,7 @@ import type {
 
 import { obtenerToken } from '../token';
 
-const BFF_BASE_URL = 'https://tmbul2u2ic.execute-api.us-east-1.amazonaws.com/lanzar';
+const BFF_BASE_URL = 'http://localhost:8080' //'https://tmbul2u2ic.execute-api.us-east-1.amazonaws.com/lanzar';
 
 export interface Cliente {
     id: number;

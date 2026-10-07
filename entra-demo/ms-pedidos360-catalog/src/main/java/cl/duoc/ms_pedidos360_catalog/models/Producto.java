@@ -23,7 +23,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class Producto implements Serializable {
 
     @Id
@@ -45,4 +44,7 @@ public class Producto implements Serializable {
 
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> imagenes;
+
+    @Column(nullable = false)
+    private Integer stock;
 }

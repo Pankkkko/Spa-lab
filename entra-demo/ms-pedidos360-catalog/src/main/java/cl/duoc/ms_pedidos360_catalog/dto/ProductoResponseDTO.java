@@ -17,4 +17,5 @@ public class ProductoResponseDTO implements Serializable {
     private String categoria;
     private BigDecimal precio;
     private List<String> imagenes;
+    private Integer stock;
 }
