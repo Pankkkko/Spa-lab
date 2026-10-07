@@ -14,3 +14,5 @@ microservices:
     base-url: http://10.0.3.142:8081
   pedidos:
     base-url: http://10.0.2.157:8082
+  catalogo:
+    base-url: http://IP_PRIVADA_CATALOGO:8083

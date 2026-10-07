@@ -169,7 +169,65 @@ public class SecurityConfig {
                 )
                 .hasRole("Admin")
 
+                // =================================================
+                // CATALOGO
+                // Cliente y Admin pueden consultar
+                // Solo Admin puede modificar
+                // =================================================
 
+                .requestMatchers(
+                    HttpMethod.GET,
+                    "/api/productos"
+                )
+                .hasAnyRole("Admin", "Cliente")
+
+                .requestMatchers(
+                    HttpMethod.GET,
+                    "/api/productos/buscar/**"
+                )
+                .hasAnyRole("Admin", "Cliente")
+
+                .requestMatchers(
+                    HttpMethod.GET,
+                    "/api/productos/*/stock"
+                )
+                .hasAnyRole("Admin", "Cliente")
+
+                .requestMatchers(
+                    HttpMethod.GET,
+                    "/api/productos/exists/**"
+                )
+                .hasAnyRole("Admin", "Cliente")
+
+                .requestMatchers(
+                    HttpMethod.GET,
+                    "/api/productos/**"
+                )
+                .hasAnyRole("Admin", "Cliente")
+
+                .requestMatchers(
+                    HttpMethod.POST,
+                    "/api/productos"
+                )
+                .hasRole("Admin")
+
+                .requestMatchers(
+                    HttpMethod.PUT,
+                    "/api/productos/*/stock"
+                )
+                .hasRole("Admin")
+
+                .requestMatchers(
+                    HttpMethod.PUT,
+                    "/api/productos/**"
+                )
+                .hasRole("Admin")
+
+                .requestMatchers(
+                    HttpMethod.DELETE,
+                    "/api/productos/**"
+                )
+                .hasRole("Admin")
                 // =================================================
                 // TODO LO DEMÁS
                 // =================================================
