@@ -4,6 +4,129 @@
     color: #0c3b45;
 }
 
+/* =========================
+   NAVBAR
+========================= */
+
+.catalogo-navbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+
+    padding: 14px 7%;
+
+    background: #ffffff;
+    border-bottom: 1px solid #dceceb;
+    box-shadow: 0 3px 12px rgba(12, 59, 69, 0.06);
+}
+
+.catalogo-navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    color: #0c3b45;
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.catalogo-navbar-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+
+    border-radius: 12px;
+
+    background: #20666b;
+    color: #ffffff;
+
+    font-size: 0.85rem;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+
+    box-shadow: 0 4px 10px rgba(12, 59, 69, 0.15);
+}
+
+.catalogo-navbar-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.catalogo-navbar-actions button {
+    padding: 10px 17px;
+
+    border: 1px solid #c7dfdc;
+    border-radius: 10px;
+
+    background: #ffffff;
+    color: #20666b;
+
+    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 700;
+
+    cursor: pointer;
+    transition:
+        background 0.2s,
+        color 0.2s,
+        border-color 0.2s,
+        transform 0.2s;
+}
+
+.catalogo-navbar-actions button:hover {
+    transform: translateY(-1px);
+
+    border-color: #20666b;
+    background: #cff0ea;
+}
+
+.catalogo-navbar-actions button:focus-visible {
+    outline: 3px solid rgba(62, 155, 148, 0.4);
+    outline-offset: 3px;
+}
+
+/* Adaptación para móviles */
+
+@media (max-width: 550px) {
+    .catalogo-navbar {
+        padding: 12px 5%;
+        gap: 10px;
+    }
+
+    .catalogo-navbar-brand {
+        gap: 8px;
+        font-size: 1rem;
+    }
+
+    .catalogo-navbar-logo {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+    }
+
+    .catalogo-navbar-actions {
+        gap: 6px;
+    }
+
+    .catalogo-navbar-actions button {
+        padding: 9px 11px;
+        font-size: 0.78rem;
+    }
+}
+
+
 
 /* =========================
    HERO

@@ -48,25 +48,27 @@ async function obtenerTokenCatalogo(
  * Obtener todos los productos paginados.
  */
 export async function obtenerProductos(
-    instance: IPublicClientApplication,
-    account: AccountInfo,
+    instance?: IPublicClientApplication,
+    account?: AccountInfo,
     page: number = 0,
     size: number = 20,
 ): Promise<ProductoPage> {
+    const headers: Record<string, string> = {};
 
-    const accessToken = await obtenerTokenCatalogo(
-        instance,
-        account,
-    );
+    if (instance && account) {
+        const accessToken = await obtenerTokenCatalogo(
+            instance,
+            account,
+        );
+
+        headers.Authorization = `Bearer ${accessToken}`;
+    }
 
     const response = await fetch(
         `${BFF_BASE_URL}/productos?page=${page}&size=${size}`,
         {
             method: 'GET',
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-                'Content-Type': 'application/json',
-            },
+            headers,
         },
     );
 

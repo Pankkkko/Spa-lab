@@ -177,6 +177,12 @@ public class SecurityConfig {
 
                 .requestMatchers(
                     HttpMethod.GET,
+                    "/api/productos/**"
+                )
+                .permitAll()
+
+                .requestMatchers(
+                    HttpMethod.GET,
                     "/api/productos"
                 )
                 .hasAnyRole("Admin", "Cliente")
@@ -199,11 +205,7 @@ public class SecurityConfig {
                 )
                 .hasAnyRole("Admin", "Cliente")
 
-                .requestMatchers(
-                    HttpMethod.GET,
-                    "/api/productos/**"
-                )
-                .hasAnyRole("Admin", "Cliente")
+                
 
                 .requestMatchers(
                     HttpMethod.POST,

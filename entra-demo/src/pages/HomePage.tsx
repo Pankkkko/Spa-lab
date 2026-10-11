@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useMsal } from "@azure/msal-react";
 
@@ -7,7 +6,7 @@ import OrdersModal from "../components/OrdersModal";
 // 🔧 DEBUG DE EVALUACIÓN
 // Se mantiene comentado para poder activarlo rápidamente.
 //
-import TokenDebugButton from "../components/TokenDebugButton";
+// import TokenDebugButton from "../components/TokenDebugButton";
 
 import { obtenerPedidos } from "../api/pedidosApi";
 import type { Pedido } from "../api/pedidosApi";
@@ -27,6 +26,7 @@ function HomePage({
     onLogout,
     onOpenCatalogo,
 }: HomePageProps) {
+
     const { instance, accounts } = useMsal();
 
     const [pedidos, setPedidos] = useState<Pedido[]>([]);
@@ -38,10 +38,18 @@ function HomePage({
     const account =
         instance.getActiveAccount() ?? accounts[0];
 
+
+    /* =====================================================
+       CARGAR PEDIDOS
+       ===================================================== */
+
     useEffect(() => {
+
         if (!isAuthenticated) {
+
             setPedidos([]);
             setErrorPedidos("");
+
             return;
         }
 
@@ -53,10 +61,12 @@ function HomePage({
         }
 
         async function cargarPedidos() {
+
             setCargandoPedidos(true);
             setErrorPedidos("");
 
             try {
+
                 const resultado = await obtenerPedidos(
                     instance,
                     cuentaActual,
@@ -64,7 +74,9 @@ function HomePage({
                 );
 
                 setPedidos(resultado);
+
             } catch (error) {
+
                 console.error(
                     "Error al cargar pedidos:",
                     error,
@@ -75,13 +87,22 @@ function HomePage({
                         ? error.message
                         : "No se pudieron cargar los pedidos.",
                 );
+
             } finally {
+
                 setCargandoPedidos(false);
+
             }
         }
 
         void cargarPedidos();
+
     }, [isAuthenticated, instance, accounts]);
+
+
+    /* =====================================================
+       PEDIDOS
+       ===================================================== */
 
     function abrirPedidos() {
         setMostrarPedidos(true);
@@ -91,17 +112,20 @@ function HomePage({
         setMostrarPedidos(false);
     }
 
-    function irAlCatalogo() {
-        window.location.href = "/catalogo";
-    }
+
+    /* =====================================================
+       USUARIO
+       ===================================================== */
 
     const nombreUsuario =
         account?.name ??
         account?.username ??
         "Cliente";
 
+
     return (
         <main className="home-page">
+
 
             {/* =====================================================
                 NAVBAR
@@ -110,6 +134,7 @@ function HomePage({
             <nav className="home-navbar">
 
                 <div className="navbar-brand">
+
                     <div className="navbar-logo">
                         P360
                     </div>
@@ -117,7 +142,9 @@ function HomePage({
                     <span>
                         Pedidos360
                     </span>
+
                 </div>
+
 
                 <div className="navbar-links">
 
@@ -128,6 +155,7 @@ function HomePage({
                         Inicio
                     </button>
 
+
                     <button
                         className="navbar-link"
                         type="button"
@@ -136,7 +164,9 @@ function HomePage({
                         Catálogo
                     </button>
 
+
                     {isAuthenticated && (
+
                         <button
                             className="navbar-link"
                             type="button"
@@ -144,13 +174,16 @@ function HomePage({
                         >
                             Mis pedidos
                         </button>
+
                     )}
 
                 </div>
 
+
                 <div className="navbar-account">
 
                     {isAuthenticated ? (
+
                         <>
                             <span className="navbar-user">
                                 {nombreUsuario}
@@ -164,7 +197,9 @@ function HomePage({
                                 Cerrar sesión
                             </button>
                         </>
+
                     ) : (
+
                         <button
                             className="navbar-login"
                             type="button"
@@ -172,6 +207,7 @@ function HomePage({
                         >
                             Iniciar sesión
                         </button>
+
                     )}
 
                 </div>
@@ -203,6 +239,7 @@ function HomePage({
                         de manera rápida y sencilla.
                     </p>
 
+
                     <div className="hero-actions">
 
                         <button
@@ -213,7 +250,9 @@ function HomePage({
                             Explorar catálogo
                         </button>
 
+
                         {isAuthenticated ? (
+
                             <button
                                 className="hero-secondary-button"
                                 type="button"
@@ -221,7 +260,9 @@ function HomePage({
                             >
                                 Ver mis pedidos
                             </button>
+
                         ) : (
+
                             <button
                                 className="hero-secondary-button"
                                 type="button"
@@ -229,6 +270,7 @@ function HomePage({
                             >
                                 Iniciar sesión
                             </button>
+
                         )}
 
                     </div>
@@ -237,7 +279,7 @@ function HomePage({
 
 
                 {/* =================================================
-                    ILUSTRACIÓN / DECORACIÓN
+                    ILUSTRACIÓN
                    ================================================= */}
 
                 <div className="hero-decoration">
@@ -257,6 +299,7 @@ function HomePage({
                         </div>
 
                         <div>
+
                             <span>
                                 PEDIDOS360
                             </span>
@@ -264,6 +307,7 @@ function HomePage({
                             <strong>
                                 Compra fácil
                             </strong>
+
                         </div>
 
                     </div>
@@ -278,9 +322,11 @@ function HomePage({
                ===================================================== */}
 
             {isAuthenticated && account && (
+
                 <section className="home-user-section">
 
                     <div>
+
                         <span className="section-label">
                             TU CUENTA
                         </span>
@@ -293,7 +339,9 @@ function HomePage({
                             Revisa tus pedidos o continúa
                             explorando nuestro catálogo.
                         </p>
+
                     </div>
+
 
                     <button
                         className="section-button"
@@ -304,6 +352,7 @@ function HomePage({
                     </button>
 
                 </section>
+
             )}
 
 
@@ -312,6 +361,9 @@ function HomePage({
                ===================================================== */}
 
             <section className="home-features">
+
+
+                {/* CATÁLOGO */}
 
                 <article className="feature-card">
 
@@ -334,13 +386,15 @@ function HomePage({
 
                     <button
                         type="button"
-                        onClick={irAlCatalogo}
+                        onClick={onOpenCatalogo}
                     >
                         Ver catálogo →
                     </button>
 
                 </article>
 
+
+                {/* PEDIDOS */}
 
                 <article className="feature-card">
 
@@ -376,6 +430,8 @@ function HomePage({
 
                 </article>
 
+
+                {/* PEDIDOS360 */}
 
                 <article className="feature-card">
 
@@ -421,9 +477,9 @@ function HomePage({
 
                ===================================================== */}
 
-            
+            {/*
                 {isAuthenticated && <TokenDebugButton />}
-            
+            */}
 
 
             {/* =====================================================
@@ -431,6 +487,7 @@ function HomePage({
                ===================================================== */}
 
             {isAuthenticated && (
+
                 <OrdersModal
                     isOpen={mostrarPedidos}
                     onClose={cerrarPedidos}
@@ -438,6 +495,7 @@ function HomePage({
                     cargando={cargandoPedidos}
                     error={errorPedidos}
                 />
+
             )}
 
         </main>
