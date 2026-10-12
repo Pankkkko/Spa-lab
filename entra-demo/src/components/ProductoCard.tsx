@@ -1,11 +1,14 @@
+import type { KeyboardEvent } from 'react';
 import type { Producto } from '../api/catalogoApi';
 
 interface ProductoCardProps {
     producto: Producto;
+    onClick: (producto: Producto) => void;
 }
 
 export default function ProductoCard({
     producto,
+    onClick,
 }: ProductoCardProps) {
     const formatearPrecio = (precio: number) =>
         new Intl.NumberFormat('es-CL', {
@@ -14,8 +17,22 @@ export default function ProductoCard({
             maximumFractionDigits: 0,
         }).format(precio);
 
+    function manejarTeclado(event: KeyboardEvent<HTMLElement>) {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            onClick(producto);
+        }
+    }
+
     return (
-        <article className="producto-card">
+        <article
+            className="producto-card"
+            role="button"
+            tabIndex={0}
+            aria-label={`Ver detalles de ${producto.nombre}`}
+            onClick={() => onClick(producto)}
+            onKeyDown={manejarTeclado}
+        >
             <div className="producto-imagen">
                 {producto.imagenes?.length > 0 ? (
                     <img
@@ -62,12 +79,16 @@ export default function ProductoCard({
                                 : 'stock agotado'
                         }
                     >
-                        <span className="stock-dot"></span>
+                        <span className="stock-dot" />
 
                         {producto.stock > 0
                             ? `${producto.stock} disponibles`
                             : 'Agotado'}
                     </div>
+                </div>
+
+                <div className="producto-ver-detalle">
+                    Ver producto →
                 </div>
             </div>
         </article>

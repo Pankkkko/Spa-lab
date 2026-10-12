@@ -1,3 +1,4 @@
+
 import { useEffect, useMemo, useState } from 'react';
 import { useMsal } from '@azure/msal-react';
 
@@ -12,6 +13,9 @@ import CatalogoFiltros from '../components/CatalogoFiltros';
 import CatalogoResultados from '../components/CatalogoResultados';
 import ProductoCard from '../components/ProductoCard';
 import CatalogoEstado from '../components/CatalogoEstado';
+import ProductoDetalle from '../components/ProductoDetalle';
+import CarritoModal from '../components/CarritoModal';
+import { useCarrito } from '../hooks/useCarrito';
 
 import '../styles/catalogo.css';
 
@@ -36,6 +40,19 @@ export default function CatalogoPage({
     const [busqueda, setBusqueda] = useState('');
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState('');
+    const [productoSeleccionado, setProductoSeleccionado] =
+        useState<Producto | null>(null);
+    const [carritoAbierto, setCarritoAbierto] = useState(false);
+
+    const {
+        items,
+        cantidadTotal,
+        agregarProducto,
+        cambiarCantidad,
+        eliminarProducto,
+        vaciarCarrito,
+        reconciliarStock,
+    } = useCarrito();
 
     useEffect(() => {
         let cancelado = false;
@@ -62,9 +79,7 @@ export default function CatalogoPage({
                 console.error('Error al cargar catálogo:', error);
 
                 if (!cancelado) {
-                    setError(
-                        'No fue posible cargar el catálogo.',
-                    );
+                    setError('No fue posible cargar el catálogo.');
                 }
             } finally {
                 if (!cancelado) {
@@ -79,6 +94,12 @@ export default function CatalogoPage({
             cancelado = true;
         };
     }, [instance, accounts]);
+
+    useEffect(() => {
+        if (!cargando && !error) {
+            reconciliarStock(productos);
+        }
+    }, [productos, cargando, error, reconciliarStock]);
 
     const productosFiltrados = useMemo(() => {
         const textoBusqueda = busqueda.toLowerCase().trim();
@@ -98,14 +119,33 @@ export default function CatalogoPage({
         });
     }, [productos, categoriaSeleccionada, busqueda]);
 
+    const manejarAgregarAlCarrito = (producto: Producto) => {
+        const agregado = agregarProducto(producto);
+
+        if (agregado) {
+            setCarritoAbierto(true);
+        }
+    };
+
     return (
         <div className="catalogo-page">
+
             <CatalogoNavbar
                 isAuthenticated={isAuthenticated}
-                onBack={onBack}
+                nombreUsuario={
+                    (instance.getActiveAccount() ?? accounts[0])?.name ??
+                    (instance.getActiveAccount() ?? accounts[0])?.username
+                }
+                cantidadCarrito={cantidadTotal}
+                paginaActual="catalogo"
+                onInicio={onBack}
+                onCatalogo={() => { }}
+                onAbrirPedidos={onBack}
                 onLogin={onLogin}
                 onLogout={onLogout}
+                onAbrirCarrito={() => setCarritoAbierto(true)}
             />
+
 
             {cargando ? (
                 <CatalogoEstado tipo="cargando" />
@@ -114,6 +154,17 @@ export default function CatalogoPage({
                     tipo="error"
                     mensaje={error}
                     onReintentar={() => window.location.reload()}
+                />
+            ) : productoSeleccionado ? (
+                <ProductoDetalle
+                    producto={
+                        productos.find(
+                            (producto) =>
+                                producto.sku === productoSeleccionado.sku,
+                        ) ?? productoSeleccionado
+                    }
+                    onVolver={() => setProductoSeleccionado(null)}
+                    onAgregarAlCarrito={manejarAgregarAlCarrito}
                 />
             ) : (
                 <>
@@ -140,6 +191,7 @@ export default function CatalogoPage({
                                     <ProductoCard
                                         key={producto.sku}
                                         producto={producto}
+                                        onClick={setProductoSeleccionado}
                                     />
                                 ))}
                             </div>
@@ -147,6 +199,15 @@ export default function CatalogoPage({
                     </section>
                 </>
             )}
+
+            <CarritoModal
+                abierto={carritoAbierto}
+                items={items}
+                onCerrar={() => setCarritoAbierto(false)}
+                onCambiarCantidad={cambiarCantidad}
+                onEliminar={eliminarProducto}
+                onVaciar={vaciarCarrito}
+            />
         </div>
     );
 }

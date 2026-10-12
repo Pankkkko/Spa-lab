@@ -13,6 +13,11 @@ import type { Pedido } from "../api/pedidosApi";
 
 import "../styles/home.css";
 
+import CatalogoNavbar from "../components/CatalogoNavbar";
+import CarritoModal from "../components/CarritoModal";
+import { useCarrito } from "../hooks/useCarrito";
+
+
 interface HomePageProps {
     isAuthenticated: boolean;
     onLogin: () => void;
@@ -37,6 +42,18 @@ function HomePage({
 
     const account =
         instance.getActiveAccount() ?? accounts[0];
+
+
+    const [carritoAbierto, setCarritoAbierto] = useState(false);
+
+    const {
+        items,
+        cantidadTotal,
+        cambiarCantidad,
+        eliminarProducto,
+        vaciarCarrito,
+    } = useCarrito();
+
 
 
     /* =====================================================
@@ -131,88 +148,20 @@ function HomePage({
                 NAVBAR
                ===================================================== */}
 
-            <nav className="home-navbar">
 
-                <div className="navbar-brand">
+            <CatalogoNavbar
+                isAuthenticated={isAuthenticated}
+                nombreUsuario={isAuthenticated ? nombreUsuario : undefined}
+                cantidadCarrito={cantidadTotal}
+                paginaActual="inicio"
+                onInicio={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                onCatalogo={onOpenCatalogo}
+                onAbrirPedidos={abrirPedidos}
+                onLogin={onLogin}
+                onLogout={onLogout}
+                onAbrirCarrito={() => setCarritoAbierto(true)}
+            />
 
-                    <div className="navbar-logo">
-                        P360
-                    </div>
-
-                    <span>
-                        Pedidos360
-                    </span>
-
-                </div>
-
-
-                <div className="navbar-links">
-
-                    <button
-                        className="navbar-link navbar-link-active"
-                        type="button"
-                    >
-                        Inicio
-                    </button>
-
-
-                    <button
-                        className="navbar-link"
-                        type="button"
-                        onClick={onOpenCatalogo}
-                    >
-                        Catálogo
-                    </button>
-
-
-                    {isAuthenticated && (
-
-                        <button
-                            className="navbar-link"
-                            type="button"
-                            onClick={abrirPedidos}
-                        >
-                            Mis pedidos
-                        </button>
-
-                    )}
-
-                </div>
-
-
-                <div className="navbar-account">
-
-                    {isAuthenticated ? (
-
-                        <>
-                            <span className="navbar-user">
-                                {nombreUsuario}
-                            </span>
-
-                            <button
-                                className="navbar-logout"
-                                type="button"
-                                onClick={onLogout}
-                            >
-                                Cerrar sesión
-                            </button>
-                        </>
-
-                    ) : (
-
-                        <button
-                            className="navbar-login"
-                            type="button"
-                            onClick={onLogin}
-                        >
-                            Iniciar sesión
-                        </button>
-
-                    )}
-
-                </div>
-
-            </nav>
 
 
             {/* =====================================================
@@ -498,6 +447,14 @@ function HomePage({
 
             )}
 
+            <CarritoModal
+                abierto={carritoAbierto}
+                items={items}
+                onCerrar={() => setCarritoAbierto(false)}
+                onCambiarCantidad={cambiarCantidad}
+                onEliminar={eliminarProducto}
+                onVaciar={vaciarCarrito}
+            />
         </main>
     );
 }
