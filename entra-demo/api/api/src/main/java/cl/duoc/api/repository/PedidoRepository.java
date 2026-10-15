@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class PedidoRepository {
@@ -47,6 +48,14 @@ public class PedidoRepository {
             .body(new ParameterizedTypeReference<List<PedidoResponse>>() {});
     }
 
+    public List<PedidoResponse> buscarPorEstado(String estado) {
+        return restClient
+            .get()
+            .uri("/api/pedidos/estado/{estado}", estado)
+            .retrieve()
+            .body(new ParameterizedTypeReference<List<PedidoResponse>>() {});
+    }
+
     // POST
     public PedidoResponse crear(PedidoResponse request) {
         return restClient
@@ -63,6 +72,15 @@ public class PedidoRepository {
             .put()
             .uri("/api/pedidos/{id}", id)
             .body(request)
+            .retrieve()
+            .body(PedidoResponse.class);
+    }
+
+    public PedidoResponse cambiarEstado(Long id, String estado) {
+        return restClient
+            .put()
+            .uri("/api/pedidos/{id}/status", id)
+            .body(Map.of("status", estado))
             .retrieve()
             .body(PedidoResponse.class);
     }

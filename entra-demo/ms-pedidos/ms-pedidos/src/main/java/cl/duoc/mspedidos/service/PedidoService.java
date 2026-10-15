@@ -5,11 +5,13 @@ import cl.duoc.mspedidos.dto.PedidoEvento;
 import cl.duoc.mspedidos.dto.PedidoResponse;
 import cl.duoc.mspedidos.entity.Pedido;
 import cl.duoc.mspedidos.entity.PedidoDetalle;
+import cl.duoc.mspedidos.entity.PedidoEstado;
 import cl.duoc.mspedidos.repository.PedidoRepository;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,15 +48,14 @@ public class PedidoService {
         Pedido pedido = pedidoRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Pedido no encontrado: " + id));
 
-        String estadoActual = pedido.getEstado();
-        if ("DESPACHADO".equals(nuevoEstado) && !"ACEPTADO".equals(estadoActual)) {
-            throw new RuntimeException("No se puede despachar sin aceptar");
-        }
-
-        pedido.setEstado(nuevoEstado);
+        PedidoEstado.validarTransicion(pedido.getEstado(), nuevoEstado);
+        pedido.setEstado(PedidoEstado.validar(nuevoEstado));
         Pedido actualizado = pedidoRepository.save(pedido);
 
-        PedidoEvento evento = PedidoEvento.of("Order" + nuevoEstado, actualizado.getId(), nuevoEstado);
+        PedidoEvento evento = PedidoEvento.of(
+            "Order" + actualizado.getEstado(),
+            actualizado.getId(),
+            actualizado.getEstado());
         rabbitTemplate.convertAndSend("cmd.topic", "kitchen.ticket", evento);
 
         return toResponse(actualizado);
@@ -78,12 +79,29 @@ public class PedidoService {
             .collect(Collectors.toList());
     }
 
+    public List<PedidoResponse> buscarPorEstado(String estado) {
+        String estadoValidado = PedidoEstado.validar(estado);
+        List<String> estadosBuscados = new ArrayList<>();
+        estadosBuscados.add(estadoValidado);
+
+        if (PedidoEstado.CREADO.name().equals(estadoValidado)) {
+            estadosBuscados.add("PENDIENTE");
+        } else if (PedidoEstado.DESPACHADO.name().equals(estadoValidado)) {
+            estadosBuscados.add("ENVIADO");
+        }
+
+        return pedidoRepository.findByEstadoIn(estadosBuscados).stream()
+            .map(this::toResponse)
+            .collect(Collectors.toList());
+    }
+
     public PedidoResponse editarPedido(Long id, PedidoResponse request) {
         Pedido pedido = pedidoRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Pedido no encontrado: " + id));
 
         pedido.setClienteId(request.clienteId());
-        pedido.setEstado(request.estado());
+        PedidoEstado.validarTransicion(pedido.getEstado(), request.estado());
+        pedido.setEstado(PedidoEstado.validar(request.estado()));
         pedido.setFecha(request.fecha() != null ? request.fecha() : LocalDate.now());
 
         pedido.getDetalles().clear();
@@ -109,7 +127,7 @@ public class PedidoService {
             pedido.getId(),
             pedido.getClienteId(),
             null,
-            pedido.getEstado(),
+            PedidoEstado.validar(pedido.getEstado()),
             pedido.getFecha(),
             pedido.getDetalles().stream().mapToDouble(PedidoDetalle::getSubtotal).sum(),
             pedido.getDetalles().stream()

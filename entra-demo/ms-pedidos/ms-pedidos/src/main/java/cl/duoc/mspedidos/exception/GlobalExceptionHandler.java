@@ -13,7 +13,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, String>> handleRuntime(RuntimeException ex) {
         return ResponseEntity
-            .status(HttpStatus.NOT_FOUND)
+            .status(ex instanceof IllegalArgumentException
+                ? HttpStatus.BAD_REQUEST
+                : HttpStatus.NOT_FOUND)
             .body(Map.of("error", ex.getMessage()));
     }
 }

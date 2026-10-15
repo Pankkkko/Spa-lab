@@ -31,6 +31,17 @@ export interface Pedido {
     detalles: PedidoDetalle[];
 }
 
+export const ESTADOS_PEDIDO = [
+    'CREADO',
+    'ACEPTADO',
+    'EN_PREPARACION',
+    'DESPACHADO',
+    'ENTREGADO',
+    'CANCELADO',
+] as const;
+
+export type EstadoPedido = (typeof ESTADOS_PEDIDO)[number];
+
 export async function obtenerClientes(
     instance: IPublicClientApplication,
     account: AccountInfo,
@@ -95,3 +106,37 @@ export async function obtenerTodosLosPedidos(
     return JSON.parse(body) as Pedido[];
 }
 
+export async function cambiarEstadoPedido(
+    instance: IPublicClientApplication,
+    account: AccountInfo,
+    pedidoId: number,
+    estado: EstadoPedido,
+): Promise<Pedido> {
+    const result = await obtenerToken(instance, account);
+
+    if (!result.accessToken) {
+        throw new Error('No se obtuvo access token');
+    }
+
+    const response = await fetch(
+        `${BFF_BASE_URL}/pedidos/${pedidoId}/status`,
+        {
+            method: 'PUT',
+            headers: {
+                Authorization: `Bearer ${result.accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ status: estado }),
+        },
+    );
+
+    const body = await response.text();
+
+    if (!response.ok) {
+        throw new Error(
+            `Error al actualizar el estado del pedido. HTTP ${response.status}: ${body}`,
+        );
+    }
+
+    return JSON.parse(body) as Pedido;
+}

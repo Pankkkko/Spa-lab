@@ -45,6 +45,11 @@ public class PedidoController {
         return ResponseEntity.ok(pedidoService.buscarPorCliente(clienteId));
     }
 
+    @GetMapping("/estado/{estado}")
+    public ResponseEntity<List<PedidoResponse>> buscarPorEstado(@PathVariable String estado) {
+        return ResponseEntity.ok(pedidoService.buscarPorEstado(estado));
+    }
+
     // 4. Agregar pedido
     @PostMapping
     public ResponseEntity<PedidoResponse> agregarPedido(@RequestBody PedidoResponse request) {
@@ -74,6 +79,9 @@ public class PedidoController {
         @RequestBody Map<String, String> body
     ) {
         String nuevoEstado = body.get("status");
+        if (nuevoEstado == null) {
+            nuevoEstado = body.get("estado");
+        }
         return ResponseEntity.ok(pedidoService.cambiarEstado(id, nuevoEstado));
     }
 }

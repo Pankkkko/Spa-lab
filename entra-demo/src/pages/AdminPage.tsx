@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useMsal } from '@azure/msal-react';
 
 import {
+    cambiarEstadoPedido,
+    ESTADOS_PEDIDO,
     obtenerClientes,
     obtenerTodosLosPedidos,
 } from '../api/adminApi';
@@ -9,6 +11,7 @@ import {
 import type {
     Cliente,
     Pedido,
+    EstadoPedido,
 } from '../api/adminApi';
 
 import '../styles/admin.css';
@@ -25,6 +28,7 @@ function AdminPage({ onLogout }: AdminPageProps) {
 
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState('');
+    const [pedidoEnActualizacion, setPedidoEnActualizacion] = useState<number | null>(null);
 
     useEffect(() => {
         const account =
@@ -80,6 +84,39 @@ function AdminPage({ onLogout }: AdminPageProps) {
         return pedidos.filter(
             (pedido) => pedido.clienteId === clienteId,
         ).length;
+    }
+
+    async function actualizarEstado(pedidoId: number, estado: EstadoPedido) {
+        const account = instance.getActiveAccount() ?? accounts[0];
+        if (!account) {
+            setError('No se encontró una cuenta activa.');
+            return;
+        }
+
+        setPedidoEnActualizacion(pedidoId);
+        setError('');
+
+        try {
+            const pedidoActualizado = await cambiarEstadoPedido(
+                instance,
+                account,
+                pedidoId,
+                estado,
+            );
+            setPedidos((pedidosActuales) =>
+                pedidosActuales.map((pedido) =>
+                    pedido.id === pedidoId ? pedidoActualizado : pedido,
+                ),
+            );
+        } catch (error) {
+            setError(
+                error instanceof Error
+                    ? error.message
+                    : 'No se pudo actualizar el estado del pedido.',
+            );
+        } finally {
+            setPedidoEnActualizacion(null);
+        }
     }
 
     return (
@@ -161,7 +198,7 @@ function AdminPage({ onLogout }: AdminPageProps) {
                                     pedidos.filter(
                                         (pedido) =>
                                             pedido.estado.toUpperCase() ===
-                                            'PENDIENTE',
+                                            'CREADO',
                                     ).length
                                 }
                             </strong>
@@ -290,11 +327,28 @@ function AdminPage({ onLogout }: AdminPageProps) {
                                                 </p>
                                             </div>
 
-                                            <span
-                                                className={`admin-order-status status-${pedido.estado.toLowerCase()}`}
-                                            >
-                                                {pedido.estado}
-                                            </span>
+                                            <label className="admin-order-status-control">
+                                                <span className="sr-only">
+                                                    Estado del pedido #{pedido.id}
+                                                </span>
+                                                <select
+                                                    className={`admin-order-status status-${pedido.estado.toLowerCase()}`}
+                                                    value={pedido.estado}
+                                                    disabled={pedidoEnActualizacion === pedido.id}
+                                                    onChange={(event) =>
+                                                        void actualizarEstado(
+                                                            pedido.id,
+                                                            event.target.value as EstadoPedido,
+                                                        )
+                                                    }
+                                                >
+                                                    {ESTADOS_PEDIDO.map((estado) => (
+                                                        <option key={estado} value={estado}>
+                                                            {estado}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </label>
                                         </div>
 
                                         <div className="admin-order-info">
@@ -396,4 +450,3 @@ function AdminPage({ onLogout }: AdminPageProps) {
 }
 
 export default AdminPage;
-

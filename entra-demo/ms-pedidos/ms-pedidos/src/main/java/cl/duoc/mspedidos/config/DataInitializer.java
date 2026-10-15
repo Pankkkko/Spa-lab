@@ -17,8 +17,8 @@ public class DataInitializer {
     CommandLineRunner initPedidos(PedidoRepository repository) {
         return args -> {
             if (repository.count() == 0) {
-                // Pedido 1: ENVIADO
-                Pedido p1 = new Pedido(1L, "ENVIADO", LocalDate.of(2026, 9, 1));
+                // Pedido 1: DESPACHADO
+                Pedido p1 = new Pedido(1L, "DESPACHADO", LocalDate.of(2026, 9, 1));
                 p1.agregarDetalle(new PedidoDetalle("Notebook Lenovo", 1, 749990.0));
                 p1.agregarDetalle(new PedidoDetalle("Mouse Logitech", 2, 29990.0));
                 repository.save(p1);
@@ -28,8 +28,8 @@ public class DataInitializer {
                 p2.agregarDetalle(new PedidoDetalle("Teclado Mecánico", 1, 89990.0));
                 repository.save(p2);
 
-                // Pedido 3: PENDIENTE
-                Pedido p3 = new Pedido(1L, "PENDIENTE", LocalDate.of(2026, 9, 12));
+                // Pedido 3: CREADO
+                Pedido p3 = new Pedido(1L, "CREADO", LocalDate.of(2026, 9, 12));
                 p3.agregarDetalle(new PedidoDetalle("Monitor 24\"", 1, 149990.0));
                 p3.agregarDetalle(new PedidoDetalle("Cable HDMI", 1, 7990.0));
                 repository.save(p3);

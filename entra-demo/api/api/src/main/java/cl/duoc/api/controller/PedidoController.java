@@ -1,6 +1,7 @@
 package cl.duoc.api.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +42,11 @@ public class PedidoController {
         return ResponseEntity.ok(pedidoRepository.buscarPorCliente(clienteId));
     }
 
+    @GetMapping("/estado/{estado}")
+    public ResponseEntity<List<PedidoResponse>> buscarPorEstado(@PathVariable String estado) {
+        return ResponseEntity.ok(pedidoRepository.buscarPorEstado(estado));
+    }
+
     @PostMapping
     public ResponseEntity<PedidoResponse> crear(@RequestBody PedidoResponse request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(pedidoRepository.crear(request));
@@ -52,6 +58,18 @@ public class PedidoController {
         @RequestBody PedidoResponse request
     ) {
         return ResponseEntity.ok(pedidoRepository.actualizar(id, request));
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<PedidoResponse> cambiarEstado(
+        @PathVariable Long id,
+        @RequestBody Map<String, String> body
+    ) {
+        String estado = body.get("status");
+        if (estado == null) {
+            estado = body.get("estado");
+        }
+        return ResponseEntity.ok(pedidoRepository.cambiarEstado(id, estado));
     }
 
     @DeleteMapping("/{id}")

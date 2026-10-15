@@ -147,6 +147,12 @@ public class SecurityConfig {
 
                 .requestMatchers(
                     HttpMethod.GET,
+                    "/api/pedidos/estado/**"
+                )
+                .hasRole("Admin")
+
+                .requestMatchers(
+                    HttpMethod.GET,
                     "/api/pedidos/{id}"
                 )
                 .hasRole("Admin")

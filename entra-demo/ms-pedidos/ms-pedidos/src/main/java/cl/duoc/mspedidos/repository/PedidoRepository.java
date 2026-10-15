@@ -10,4 +10,5 @@ import cl.duoc.mspedidos.entity.Pedido;
 @Repository
 public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     List<Pedido> findByClienteId(Long clienteId);
+    List<Pedido> findByEstadoIn(List<String> estados);
 }

@@ -203,7 +203,46 @@
     font-weight: 800;
 }
 
-.status-enviado {
+.admin-order-status-control select {
+    border: 0;
+    font: inherit;
+    cursor: pointer;
+}
+
+.admin-order-status-control select:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.status-creado {
+    background: #ffffff;
+    color: #20666B;
+    border: 1px solid #88C9C4;
+}
+
+.status-aceptado {
+    background: #88C9C4;
+    color: #0C3B45;
+}
+
+.status-en_preparacion {
+    background: #B8E1DC;
+    color: #0C3B45;
+}
+
+.status-despachado {
     background: #88C9C4;
     color: #0C3B45;
 }
@@ -213,10 +252,9 @@
     color: #20666B;
 }
 
-.status-pendiente {
-    background: #ffffff;
-    color: #20666B;
-    border: 1px solid #88C9C4;
+.status-cancelado {
+    background: #F5D6D6;
+    color: #8a3030;
 }
 
 .admin-order-info {
@@ -322,4 +360,3 @@
         grid-template-columns: 1fr;
     }
 }
-
