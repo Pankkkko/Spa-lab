@@ -1,12 +1,13 @@
 package cl.duoc.ms_pedidos360_notify.config;
 
+import org.springframework.amqp.core.AcknowledgeMode;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
-import org.springframework.amqp.core.AcknowledgeMode;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.context.annotation.Bean;
@@ -15,99 +16,146 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMessagingConfig {
 
-    // Exchange principal de eventos
-    public static final String EXCHANGE_PEDIDOS =
-            "pedidos360.events";
+    // Exchanges
+    public static final String EXCHANGE_DIRECT = "cmd.direct";
+    public static final String EXCHANGE_TOPIC = "cmd.topic";
+    public static final String EXCHANGE_DLX = "cmd.dead.dlx";
 
-    // Cola consumida por este microservicio
-    public static final String QUEUE_NOTIFICACIONES =
-            "notificaciones.pedidos";
+    // Colas principales
+    public static final String QUEUE_EMAIL = "q.cmd.email";
+    public static final String QUEUE_PEDIDOS = "q.cmd.pedidos";
+    public static final String QUEUE_INVOICE = "q.cmd.invoice";
 
-    // Routing key del evento de creación
-    public static final String ROUTING_KEY_PEDIDO_CREADO =
-            "pedido.creado";
+    // Dead-letter queues
+    public static final String QUEUE_EMAIL_DLQ = "q.cmd.email.dlq";
+    public static final String QUEUE_PEDIDOS_DLQ = "q.cmd.pedidos.dlq";
+    public static final String QUEUE_INVOICE_DLQ = "q.cmd.invoice.dlq";
 
-    // Exchange y cola para mensajes fallidos
-    public static final String EXCHANGE_DLQ =
-            "pedidos360.notify.dlx";
+    // Routing keys
+    public static final String KEY_EMAIL = "email.send";
+    public static final String KEY_PEDIDOS = "pedidos.procesar";
+    public static final String KEY_INVOICE = "invoice.gen";
 
-    public static final String QUEUE_DLQ =
-            "notificaciones.pedidos.dlq";
+    // Patrones topic
+    public static final String PATTERN_EMAIL = "email.*";
+    public static final String PATTERN_PEDIDOS = "pedidos.#";
+    public static final String PATTERN_INVOICE = "invoice.*";
 
-    public static final String ROUTING_KEY_DLQ =
-            "pedido.creado.dlq";
-
-    // Cola de reintento
-    public static final String QUEUE_REINTENTOS =
-            "notificaciones.pedidos.retry";
-
-    public static final String HEADER_REINTENTOS =
-            "x-retry-count";
-
+    // Reintentos locales, sin crear una séptima cola
     public static final int MAX_INTENTOS = 3;
     public static final int ESPERA_REINTENTO_MS = 5000;
 
     @Bean
-    public DirectExchange exchangePedidos() {
-        return new DirectExchange(EXCHANGE_PEDIDOS, true, false);
+    public DirectExchange cmdDirectExchange() {
+        return new DirectExchange(EXCHANGE_DIRECT, true, false);
     }
 
     @Bean
-    public DirectExchange exchangeDlq() {
-        return new DirectExchange(EXCHANGE_DLQ, true, false);
+    public TopicExchange cmdTopicExchange() {
+        return new TopicExchange(EXCHANGE_TOPIC, true, false);
     }
 
     @Bean
-    public Queue colaNotificaciones() {
-        return QueueBuilder.durable(QUEUE_NOTIFICACIONES)
-                .withArgument(
-                        "x-dead-letter-exchange",
-                        EXCHANGE_DLQ
-                )
-                .withArgument(
-                        "x-dead-letter-routing-key",
-                        ROUTING_KEY_DLQ
-                )
+    public DirectExchange cmdDeadLetterExchange() {
+        return new DirectExchange(EXCHANGE_DLX, true, false);
+    }
+
+    // Colas principales con su DLX y routing key de destino
+    @Bean
+    public Queue colaEmail() {
+        return QueueBuilder.durable(QUEUE_EMAIL)
+                .deadLetterExchange(EXCHANGE_DLX)
+                .deadLetterRoutingKey(KEY_EMAIL)
                 .build();
     }
 
     @Bean
-    public Queue colaDlq() {
-        return QueueBuilder.durable(QUEUE_DLQ).build();
-    }
-
-    @Bean
-    public Queue colaReintentos() {
-        return QueueBuilder.durable(QUEUE_REINTENTOS)
-                .withArgument(
-                        "x-message-ttl",
-                        ESPERA_REINTENTO_MS
-                )
-                .withArgument(
-                        "x-dead-letter-exchange",
-                        EXCHANGE_PEDIDOS
-                )
-                .withArgument(
-                        "x-dead-letter-routing-key",
-                        ROUTING_KEY_PEDIDO_CREADO
-                )
+    public Queue colaPedidos() {
+        return QueueBuilder.durable(QUEUE_PEDIDOS)
+                .deadLetterExchange(EXCHANGE_DLX)
+                .deadLetterRoutingKey(KEY_PEDIDOS)
                 .build();
     }
 
     @Bean
-    public Binding bindingNotificaciones() {
-        return BindingBuilder
-                .bind(colaNotificaciones())
-                .to(exchangePedidos())
-                .with(ROUTING_KEY_PEDIDO_CREADO);
+    public Queue colaInvoice() {
+        return QueueBuilder.durable(QUEUE_INVOICE)
+                .deadLetterExchange(EXCHANGE_DLX)
+                .deadLetterRoutingKey(KEY_INVOICE)
+                .build();
+    }
+
+    // DLQ
+    @Bean
+    public Queue colaEmailDlq() {
+        return QueueBuilder.durable(QUEUE_EMAIL_DLQ).build();
     }
 
     @Bean
-    public Binding bindingDlq() {
-        return BindingBuilder
-                .bind(colaDlq())
-                .to(exchangeDlq())
-                .with(ROUTING_KEY_DLQ);
+    public Queue colaPedidosDlq() {
+        return QueueBuilder.durable(QUEUE_PEDIDOS_DLQ).build();
+    }
+
+    @Bean
+    public Queue colaInvoiceDlq() {
+        return QueueBuilder.durable(QUEUE_INVOICE_DLQ).build();
+    }
+
+    // Bindings direct
+    @Bean
+    public Binding emailDirectBinding() {
+        return BindingBuilder.bind(colaEmail())
+                .to(cmdDirectExchange()).with(KEY_EMAIL);
+    }
+
+    @Bean
+    public Binding pedidosDirectBinding() {
+        return BindingBuilder.bind(colaPedidos())
+                .to(cmdDirectExchange()).with(KEY_PEDIDOS);
+    }
+
+    @Bean
+    public Binding invoiceDirectBinding() {
+        return BindingBuilder.bind(colaInvoice())
+                .to(cmdDirectExchange()).with(KEY_INVOICE);
+    }
+
+    // Bindings topic
+    @Bean
+    public Binding emailTopicBinding() {
+        return BindingBuilder.bind(colaEmail())
+                .to(cmdTopicExchange()).with(PATTERN_EMAIL);
+    }
+
+    @Bean
+    public Binding pedidosTopicBinding() {
+        return BindingBuilder.bind(colaPedidos())
+                .to(cmdTopicExchange()).with(PATTERN_PEDIDOS);
+    }
+
+    @Bean
+    public Binding invoiceTopicBinding() {
+        return BindingBuilder.bind(colaInvoice())
+                .to(cmdTopicExchange()).with(PATTERN_INVOICE);
+    }
+
+    // Bindings DLQ
+    @Bean
+    public Binding emailDlqBinding() {
+        return BindingBuilder.bind(colaEmailDlq())
+                .to(cmdDeadLetterExchange()).with(KEY_EMAIL);
+    }
+
+    @Bean
+    public Binding pedidosDlqBinding() {
+        return BindingBuilder.bind(colaPedidosDlq())
+                .to(cmdDeadLetterExchange()).with(KEY_PEDIDOS);
+    }
+
+    @Bean
+    public Binding invoiceDlqBinding() {
+        return BindingBuilder.bind(colaInvoiceDlq())
+                .to(cmdDeadLetterExchange()).with(KEY_INVOICE);
     }
 
     @Bean
