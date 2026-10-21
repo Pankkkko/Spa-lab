@@ -1,3 +1,4 @@
+
 package cl.duoc.mspedidos.config;
 
 import org.springframework.amqp.core.Binding;
@@ -17,66 +18,131 @@ public class RabbitMQConfig {
     public static final String EXCHANGE_DLX = "cmd.dead.dlx";
 
     public static final String Q_EMAIL = "q.cmd.email";
-    public static final String Q_KITCHEN = "q.cmd.kitchen";
+    public static final String Q_PEDIDOS = "q.cmd.pedidos";
     public static final String Q_INVOICE = "q.cmd.invoice";
 
+    public static final String Q_EMAIL_DLQ = "q.cmd.email.dlq";
+    public static final String Q_PEDIDOS_DLQ = "q.cmd.pedidos.dlq";
+    public static final String Q_INVOICE_DLQ = "q.cmd.invoice.dlq";
+
+    public static final String KEY_EMAIL = "email.send";
+    public static final String KEY_PEDIDOS = "pedidos.procesar";
+    public static final String KEY_INVOICE = "invoice.gen";
+
+    public static final String PATTERN_EMAIL = "email.*";
+    public static final String PATTERN_PEDIDOS = "pedidos.#";
+    public static final String PATTERN_INVOICE = "invoice.*";
+
     @Bean
-    public Queue qEmail() {
-        return QueueBuilder.durable(Q_EMAIL).build();
+    public DirectExchange cmdDirectExchange() {
+        return new DirectExchange(EXCHANGE_DIRECT, true, false);
     }
 
     @Bean
-    public Queue qKitchen() {
-        return QueueBuilder.durable(Q_KITCHEN).build();
+    public TopicExchange cmdTopicExchange() {
+        return new TopicExchange(EXCHANGE_TOPIC, true, false);
     }
 
     @Bean
-    public Queue qInvoice() {
-        return QueueBuilder.durable(Q_INVOICE).build();
+    public DirectExchange cmdDeadLetterExchange() {
+        return new DirectExchange(EXCHANGE_DLX, true, false);
+    }
+
+    // Colas principales con configuración DLX compatible
+    @Bean
+    public Queue colaEmail() {
+        return QueueBuilder.durable(Q_EMAIL)
+                .deadLetterExchange(EXCHANGE_DLX)
+                .deadLetterRoutingKey(KEY_EMAIL)
+                .build();
     }
 
     @Bean
-    public DirectExchange directExchange() {
-        return new DirectExchange(EXCHANGE_DIRECT);
+    public Queue colaPedidos() {
+        return QueueBuilder.durable(Q_PEDIDOS)
+                .deadLetterExchange(EXCHANGE_DLX)
+                .deadLetterRoutingKey(KEY_PEDIDOS)
+                .build();
     }
 
     @Bean
-    public TopicExchange topicExchange() {
-        return new TopicExchange(EXCHANGE_TOPIC);
+    public Queue colaInvoice() {
+        return QueueBuilder.durable(Q_INVOICE)
+                .deadLetterExchange(EXCHANGE_DLX)
+                .deadLetterRoutingKey(KEY_INVOICE)
+                .build();
+    }
+
+    // Dead Letter Queues
+    @Bean
+    public Queue colaEmailDlq() {
+        return QueueBuilder.durable(Q_EMAIL_DLQ).build();
     }
 
     @Bean
-    public DirectExchange deadLetterExchange() {
-        return new DirectExchange(EXCHANGE_DLX);
+    public Queue colaPedidosDlq() {
+        return QueueBuilder.durable(Q_PEDIDOS_DLQ).build();
     }
 
     @Bean
-    public Binding bEmail() {
-        return BindingBuilder.bind(qEmail()).to(directExchange()).with("email.send");
+    public Queue colaInvoiceDlq() {
+        return QueueBuilder.durable(Q_INVOICE_DLQ).build();
+    }
+
+    // Bindings direct
+    @Bean
+    public Binding emailDirectBinding() {
+        return BindingBuilder.bind(colaEmail())
+                .to(cmdDirectExchange()).with(KEY_EMAIL);
     }
 
     @Bean
-    public Binding bKitchen() {
-        return BindingBuilder.bind(qKitchen()).to(directExchange()).with("kitchen.ticket");
+    public Binding pedidosDirectBinding() {
+        return BindingBuilder.bind(colaPedidos())
+                .to(cmdDirectExchange()).with(KEY_PEDIDOS);
     }
 
     @Bean
-    public Binding bInvoice() {
-        return BindingBuilder.bind(qInvoice()).to(directExchange()).with("invoice.gen");
+    public Binding invoiceDirectBinding() {
+        return BindingBuilder.bind(colaInvoice())
+                .to(cmdDirectExchange()).with(KEY_INVOICE);
+    }
+
+    // Bindings topic
+    @Bean
+    public Binding emailTopicBinding() {
+        return BindingBuilder.bind(colaEmail())
+                .to(cmdTopicExchange()).with(PATTERN_EMAIL);
     }
 
     @Bean
-    public Binding bEmailTopic() {
-        return BindingBuilder.bind(qEmail()).to(topicExchange()).with("email.*");
+    public Binding pedidosTopicBinding() {
+        return BindingBuilder.bind(colaPedidos())
+                .to(cmdTopicExchange()).with(PATTERN_PEDIDOS);
     }
 
     @Bean
-    public Binding bKitchenTopic() {
-        return BindingBuilder.bind(qKitchen()).to(topicExchange()).with("kitchen.#");
+    public Binding invoiceTopicBinding() {
+        return BindingBuilder.bind(colaInvoice())
+                .to(cmdTopicExchange()).with(PATTERN_INVOICE);
+    }
+
+    // Bindings DLQ
+    @Bean
+    public Binding emailDlqBinding() {
+        return BindingBuilder.bind(colaEmailDlq())
+                .to(cmdDeadLetterExchange()).with(KEY_EMAIL);
     }
 
     @Bean
-    public Binding bInvoiceTopic() {
-        return BindingBuilder.bind(qInvoice()).to(topicExchange()).with("invoice.*");
+    public Binding pedidosDlqBinding() {
+        return BindingBuilder.bind(colaPedidosDlq())
+                .to(cmdDeadLetterExchange()).with(KEY_PEDIDOS);
+    }
+
+    @Bean
+    public Binding invoiceDlqBinding() {
+        return BindingBuilder.bind(colaInvoiceDlq())
+                .to(cmdDeadLetterExchange()).with(KEY_INVOICE);
     }
 }
