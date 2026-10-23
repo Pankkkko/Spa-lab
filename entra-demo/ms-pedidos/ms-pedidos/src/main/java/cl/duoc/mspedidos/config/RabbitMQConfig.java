@@ -1,4 +1,3 @@
-
 package cl.duoc.mspedidos.config;
 
 import org.springframework.amqp.core.Binding;
@@ -7,8 +6,12 @@ import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 
 @Configuration
 public class RabbitMQConfig {
@@ -144,5 +147,20 @@ public class RabbitMQConfig {
     public Binding invoiceDlqBinding() {
         return BindingBuilder.bind(colaInvoiceDlq())
                 .to(cmdDeadLetterExchange()).with(KEY_INVOICE);
+    }
+
+    @Bean
+    public MessageConverter jacksonJsonMessageConverter() {
+        return new JacksonJsonMessageConverter();
+    }
+
+    @Bean
+    public RabbitTemplate rabbitTemplate(
+            org.springframework.amqp.rabbit.connection.ConnectionFactory connectionFactory,
+            MessageConverter jacksonJsonMessageConverter
+    ) {
+        RabbitTemplate template = new RabbitTemplate(connectionFactory);
+        template.setMessageConverter(jacksonJsonMessageConverter);
+        return template;
     }
 }

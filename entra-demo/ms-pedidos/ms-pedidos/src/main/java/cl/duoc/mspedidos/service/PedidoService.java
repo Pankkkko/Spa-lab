@@ -1,17 +1,4 @@
-
 package cl.duoc.mspedidos.service;
-
-import cl.duoc.mspedidos.config.RabbitMQConfig;
-import cl.duoc.mspedidos.dto.ComandoEnvelope;
-import cl.duoc.mspedidos.dto.PedidoDetalleResponse;
-import cl.duoc.mspedidos.dto.PedidoResponse;
-import cl.duoc.mspedidos.entity.Pedido;
-import cl.duoc.mspedidos.entity.PedidoDetalle;
-import cl.duoc.mspedidos.entity.PedidoEstado;
-import cl.duoc.mspedidos.repository.PedidoRepository;
-
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -21,18 +8,35 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.stereotype.Service;
+
+import cl.duoc.mspedidos.config.RabbitMQConfig;
+import cl.duoc.mspedidos.dto.ComandoEnvelope;
+import cl.duoc.mspedidos.dto.PedidoDetalleResponse;
+import cl.duoc.mspedidos.dto.PedidoResponse;
+import cl.duoc.mspedidos.entity.Pedido;
+import cl.duoc.mspedidos.entity.PedidoDetalle;
+import cl.duoc.mspedidos.entity.PedidoEstado;
+import cl.duoc.mspedidos.repository.PedidoRepository;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+
 @Service
 public class PedidoService {
 
     private final PedidoRepository pedidoRepository;
     private final RabbitTemplate rabbitTemplate;
+    private final ObjectMapper objectMapper;
 
     public PedidoService(
             PedidoRepository pedidoRepository,
-            RabbitTemplate rabbitTemplate
+            RabbitTemplate rabbitTemplate,
+            ObjectMapper objectMapper
     ) {
         this.pedidoRepository = pedidoRepository;
         this.rabbitTemplate = rabbitTemplate;
+        this.objectMapper = objectMapper;
     }
 
     public PedidoResponse agregarPedido(PedidoResponse request) {
@@ -226,13 +230,15 @@ public class PedidoService {
             String traceId,
             String correlationId
     ) {
+        JsonNode payload = objectMapper.valueToTree(crearPayload(pedido));
+
         ComandoEnvelope evento = new ComandoEnvelope(
                 tipo,
                 UUID.randomUUID().toString(),
                 Instant.now(),
                 traceId,
                 correlationId,
-                crearPayload(pedido)
+                payload
         );
 
         rabbitTemplate.convertAndSend(
