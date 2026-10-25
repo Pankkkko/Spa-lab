@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import cl.duoc.mspedidos.dto.PedidoResponse;
 import cl.duoc.mspedidos.service.PedidoService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/pedidos")
@@ -52,18 +53,23 @@ public class PedidoController {
 
     // 4. Agregar pedido
     @PostMapping
-    public ResponseEntity<PedidoResponse> agregarPedido(@RequestBody PedidoResponse request) {
+    public ResponseEntity<PedidoResponse> agregarPedido(
+            @Valid @RequestBody PedidoResponse request) {
+
         PedidoResponse creado = pedidoService.agregarPedido(request);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(creado);
     }
 
     // 5. Editar pedido
     @PutMapping("/{id}")
     public ResponseEntity<PedidoResponse> editarPedido(
-        @PathVariable Long id,
-        @RequestBody PedidoResponse request
-    ) {
-        return ResponseEntity.ok(pedidoService.editarPedido(id, request));
+            @PathVariable Long id,
+            @Valid @RequestBody PedidoResponse request) {
+
+        PedidoResponse actualizado = pedidoService.editarPedido(id, request);
+
+        return ResponseEntity.ok(actualizado);
     }
 
     // 6. Eliminar pedido
@@ -75,8 +81,8 @@ public class PedidoController {
 
     @PutMapping("/{id}/status")
     public ResponseEntity<PedidoResponse> cambiarEstado(
-        @PathVariable Long id,
-        @RequestBody Map<String, String> body
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body
     ) {
         String nuevoEstado = body.get("status");
         if (nuevoEstado == null) {
