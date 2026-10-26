@@ -24,7 +24,11 @@ public class Cliente {
     @Column(length = 20)
     private String telefono;
 
-    public Cliente() {}
+    @Column(name = "entra_object_id", unique = true, length = 36)
+    private String entraObjectId;
+
+    public Cliente() {
+    }
 
     public Cliente(String nombre, String email, String telefono) {
         this.nombre = nombre;
@@ -32,15 +36,43 @@ public class Cliente {
         this.telefono = telefono;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public String getNombre() {
+        return nombre;
+    }
 
-    public String getTelefono() { return telefono; }
-    public void setTelefono(String telefono) { this.telefono = telefono; }
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+    public String getEntraObjectId() {
+        return entraObjectId;
+    }
+
+    public void setEntraObjectId(String entraObjectId) {
+        this.entraObjectId = entraObjectId;
+    }
 }

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import cl.duoc.msclientes.dto.ClientePerfilRequest;
 import cl.duoc.msclientes.dto.ClienteResponse;
 import cl.duoc.msclientes.service.ClienteService;
 
@@ -48,8 +49,8 @@ public class ClienteController {
     // 4. Editar cliente
     @PutMapping("/{id}")
     public ResponseEntity<ClienteResponse> editarCliente(
-        @PathVariable Long id,
-        @RequestBody ClienteResponse request
+            @PathVariable Long id,
+            @RequestBody ClienteResponse request
     ) {
         return ResponseEntity.ok(clienteService.editarCliente(id, request));
     }
@@ -59,5 +60,23 @@ public class ClienteController {
     public ResponseEntity<Void> eliminarCliente(@PathVariable Long id) {
         clienteService.eliminarCliente(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/identidad/{entraObjectId}")
+    public ResponseEntity<ClienteResponse> buscarPorIdentidad(
+            @PathVariable String entraObjectId) {
+
+        return ResponseEntity.ok(
+                clienteService.buscarPorEntraObjectId(entraObjectId)
+        );
+    }
+
+    @PostMapping("/perfil")
+    public ResponseEntity<ClienteResponse> crearPerfil(
+            @RequestBody ClientePerfilRequest request) {
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(clienteService.crearPerfil(request));
     }
 }

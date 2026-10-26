@@ -29,45 +29,45 @@ public class SecurityConfig {
     @Bean
     public JwtDecoder jwtDecoder() {
         return JwtDecoders.fromIssuerLocation(
-            "https://login.microsoftonline.com/49551105-7651-4748-a01b-22b28daeb087/v2.0"
+                "https://login.microsoftonline.com/49551105-7651-4748-a01b-22b28daeb087/v2.0"
         );
     }
 
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
 
-        JwtGrantedAuthoritiesConverter scopesConverter =
-            new JwtGrantedAuthoritiesConverter();
+        JwtGrantedAuthoritiesConverter scopesConverter
+                = new JwtGrantedAuthoritiesConverter();
 
         scopesConverter.setAuthorityPrefix("SCOPE_");
         scopesConverter.setAuthoritiesClaimName("scp");
 
-        JwtAuthenticationConverter converter =
-            new JwtAuthenticationConverter();
+        JwtAuthenticationConverter converter
+                = new JwtAuthenticationConverter();
 
         converter.setJwtGrantedAuthoritiesConverter(
-            jwt -> {
+                jwt -> {
 
-                Collection<GrantedAuthority> authorities =
-                    new ArrayList<>(
-                        scopesConverter.convert(jwt)
+                    Collection<GrantedAuthority> authorities
+                    = new ArrayList<>(
+                            scopesConverter.convert(jwt)
                     );
 
-                List<String> roles =
-                    jwt.getClaimAsStringList("roles");
+                    List<String> roles
+                    = jwt.getClaimAsStringList("roles");
 
-                if (roles != null) {
-                    for (String role : roles) {
-                        authorities.add(
-                            new SimpleGrantedAuthority(
-                                "ROLE_" + role
-                            )
-                        );
+                    if (roles != null) {
+                        for (String role : roles) {
+                            authorities.add(
+                                    new SimpleGrantedAuthority(
+                                            "ROLE_" + role
+                                    )
+                            );
+                        }
                     }
-                }
 
-                return authorities;
-            }
+                    return authorities;
+                }
         );
 
         return converter;
@@ -75,223 +75,202 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain security(
-        HttpSecurity http,
-        JwtAuthenticationConverter jwtAuthenticationConverter
+            HttpSecurity http,
+            JwtAuthenticationConverter jwtAuthenticationConverter
     ) throws Exception {
 
         return http
-            .csrf(csrf -> csrf.disable())
-
-            .cors(Customizer.withDefaults())
-
-            .sessionManagement(
-                s -> s.sessionCreationPolicy(
-                    SessionCreationPolicy.STATELESS
+                .csrf(csrf -> csrf.disable())
+                .cors(Customizer.withDefaults())
+                .sessionManagement(
+                        s -> s.sessionCreationPolicy(
+                                SessionCreationPolicy.STATELESS
+                        )
                 )
-            )
+                .authorizeHttpRequests(auth -> auth
+                        // =================================================
+                        // PEDIDOS DEL CLIENTE
+                        // Cliente y Admin pueden consultar pedidos de cliente
+                        // =================================================
 
-            .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/pedidos/cliente/**"
+                        )
+                        .hasAnyRole("Admin", "Cliente")
 
-                // =================================================
-                // PEDIDOS DEL CLIENTE
-                // Cliente y Admin pueden consultar pedidos de cliente
-                // =================================================
+                        
+                        .requestMatchers(
+                                HttpMethod.GET, "/api/clientes/me"
+                        ).hasAnyRole("Cliente", "Admin")
+                        .requestMatchers(
+                                HttpMethod.POST, "/api/clientes/perfil"
+                        ).hasRole("Cliente")
+                        // =================================================
+                        // CLIENTES
+                        // Solo Admin
+                        // =================================================
 
-                .requestMatchers(
-                    HttpMethod.GET,
-                    "/api/pedidos/cliente/**"
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/clientes/**"
+                        )
+                        .hasRole("Admin")
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/clientes"
+                        )
+                        .hasRole("Admin")
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/api/clientes/**"
+                        )
+                        .hasRole("Admin")
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/api/clientes/**"
+                        )
+                        .hasRole("Admin")
+                        // =================================================
+                        // PEDIDOS
+                        // Solo Admin para gestión general
+                        // =================================================
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/pedidos"
+                        )
+                        .hasRole("Admin")
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/pedidos/estado/**"
+                        )
+                        .hasRole("Admin")
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/pedidos/{id}"
+                        )
+                        .hasRole("Admin")
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/pedidos"
+                        )
+                        .hasRole("Admin")
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/api/pedidos/**"
+                        )
+                        .hasRole("Admin")
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/api/pedidos/**"
+                        )
+                        .hasRole("Admin")
+                        // =================================================
+                        // CATALOGO
+                        // Cliente y Admin pueden consultar
+                        // Solo Admin puede modificar
+                        // =================================================
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/productos/**"
+                        )
+                        .permitAll()
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/productos"
+                        )
+                        .hasAnyRole("Admin", "Cliente")
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/productos/buscar/**"
+                        )
+                        .hasAnyRole("Admin", "Cliente")
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/productos/*/stock"
+                        )
+                        .hasAnyRole("Admin", "Cliente")
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/productos/exists/**"
+                        )
+                        .hasAnyRole("Admin", "Cliente")
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/productos"
+                        )
+                        .hasRole("Admin")
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/api/productos/*/stock"
+                        )
+                        .hasRole("Admin")
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/api/productos/**"
+                        )
+                        .hasRole("Admin")
+                        .requestMatchers(
+                                HttpMethod.DELETE,
+                                "/api/productos/**"
+                        )
+                        .hasRole("Admin")
+                        // =================================================
+                        // TODO LO DEMÁS
+                        // =================================================
+
+                        .anyRequest()
+                        .denyAll()
                 )
-                .hasAnyRole("Admin", "Cliente")
-
-
-                // =================================================
-                // CLIENTES
-                // Solo Admin
-                // =================================================
-
-                .requestMatchers(
-                    HttpMethod.GET,
-                    "/api/clientes/**"
+                .oauth2ResourceServer(
+                        oauth -> oauth
+                                .jwt(
+                                        jwt -> jwt
+                                                .jwtAuthenticationConverter(
+                                                        jwtAuthenticationConverter
+                                                )
+                                )
                 )
-                .hasRole("Admin")
-
-                .requestMatchers(
-                    HttpMethod.POST,
-                    "/api/clientes"
-                )
-                .hasRole("Admin")
-
-                .requestMatchers(
-                    HttpMethod.PUT,
-                    "/api/clientes/**"
-                )
-                .hasRole("Admin")
-
-                .requestMatchers(
-                    HttpMethod.DELETE,
-                    "/api/clientes/**"
-                )
-                .hasRole("Admin")
-
-
-                // =================================================
-                // PEDIDOS
-                // Solo Admin para gestión general
-                // =================================================
-
-                .requestMatchers(
-                    HttpMethod.GET,
-                    "/api/pedidos"
-                )
-                .hasRole("Admin")
-
-                .requestMatchers(
-                    HttpMethod.GET,
-                    "/api/pedidos/estado/**"
-                )
-                .hasRole("Admin")
-
-                .requestMatchers(
-                    HttpMethod.GET,
-                    "/api/pedidos/{id}"
-                )
-                .hasRole("Admin")
-
-                .requestMatchers(
-                    HttpMethod.POST,
-                    "/api/pedidos"
-                )
-                .hasRole("Admin")
-
-                .requestMatchers(
-                    HttpMethod.PUT,
-                    "/api/pedidos/**"
-                )
-                .hasRole("Admin")
-
-                .requestMatchers(
-                    HttpMethod.DELETE,
-                    "/api/pedidos/**"
-                )
-                .hasRole("Admin")
-
-                // =================================================
-                // CATALOGO
-                // Cliente y Admin pueden consultar
-                // Solo Admin puede modificar
-                // =================================================
-
-                .requestMatchers(
-                    HttpMethod.GET,
-                    "/api/productos/**"
-                )
-                .permitAll()
-
-                .requestMatchers(
-                    HttpMethod.GET,
-                    "/api/productos"
-                )
-                .hasAnyRole("Admin", "Cliente")
-
-                .requestMatchers(
-                    HttpMethod.GET,
-                    "/api/productos/buscar/**"
-                )
-                .hasAnyRole("Admin", "Cliente")
-
-                .requestMatchers(
-                    HttpMethod.GET,
-                    "/api/productos/*/stock"
-                )
-                .hasAnyRole("Admin", "Cliente")
-
-                .requestMatchers(
-                    HttpMethod.GET,
-                    "/api/productos/exists/**"
-                )
-                .hasAnyRole("Admin", "Cliente")
-
-                
-
-                .requestMatchers(
-                    HttpMethod.POST,
-                    "/api/productos"
-                )
-                .hasRole("Admin")
-
-                .requestMatchers(
-                    HttpMethod.PUT,
-                    "/api/productos/*/stock"
-                )
-                .hasRole("Admin")
-
-                .requestMatchers(
-                    HttpMethod.PUT,
-                    "/api/productos/**"
-                )
-                .hasRole("Admin")
-
-                .requestMatchers(
-                    HttpMethod.DELETE,
-                    "/api/productos/**"
-                )
-                .hasRole("Admin")
-                // =================================================
-                // TODO LO DEMÁS
-                // =================================================
-
-                .anyRequest()
-                .denyAll()
-            )
-
-            .oauth2ResourceServer(
-                oauth -> oauth
-                    .jwt(
-                        jwt -> jwt
-                            .jwtAuthenticationConverter(
-                                jwtAuthenticationConverter
-                            )
-                    )
-            )
-
-            .build();
+                .build();
     }
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
 
-        CorsConfiguration configuration =
-            new CorsConfiguration();
+        CorsConfiguration configuration
+                = new CorsConfiguration();
 
         configuration.setAllowedOrigins(
-            List.of("http://localhost:5173")
+                List.of("http://localhost:5173")
         );
 
         configuration.setAllowedMethods(
-            List.of(
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE",
-                "OPTIONS"
-            )
+                List.of(
+                        "GET",
+                        "POST",
+                        "PUT",
+                        "DELETE",
+                        "OPTIONS"
+                )
         );
 
         configuration.setAllowedHeaders(
-            List.of(
-                "Authorization",
-                "Content-Type"
-            )
+                List.of(
+                        "Authorization",
+                        "Content-Type"
+                )
         );
 
         configuration.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source =
-            new UrlBasedCorsConfigurationSource();
+        UrlBasedCorsConfigurationSource source
+                = new UrlBasedCorsConfigurationSource();
 
         source.registerCorsConfiguration(
-            "/**",
-            configuration
+                "/**",
+                configuration
         );
 
         return source;
