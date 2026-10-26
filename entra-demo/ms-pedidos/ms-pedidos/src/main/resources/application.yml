@@ -43,3 +43,5 @@ spring:
   username: admin
 
   password: admin123
+internal:
+  api-key: "Pedidos360-local-8f4c9b7e2a6d"

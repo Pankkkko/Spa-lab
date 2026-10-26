@@ -88,6 +88,8 @@ public class SecurityConfig {
                         )
                 )
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.POST, "/api/pedidos/checkout")
+                        .hasAnyRole("Cliente", "Admin")
                         // =================================================
                         // PEDIDOS DEL CLIENTE
                         // Cliente y Admin pueden consultar pedidos de cliente
@@ -98,8 +100,6 @@ public class SecurityConfig {
                                 "/api/pedidos/cliente/**"
                         )
                         .hasAnyRole("Admin", "Cliente")
-
-                        
                         .requestMatchers(
                                 HttpMethod.GET, "/api/clientes/me"
                         ).hasAnyRole("Cliente", "Admin")

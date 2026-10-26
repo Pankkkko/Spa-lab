@@ -1,8 +1,11 @@
 package cl.duoc.mspedidos.controller;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,9 +28,14 @@ import jakarta.validation.Valid;
 public class PedidoController {
 
     private final PedidoService pedidoService;
+    private final String internalApiKey;
 
-    public PedidoController(PedidoService pedidoService) {
+    public PedidoController(
+            PedidoService pedidoService,
+            @Value("${internal.api-key}") String internalApiKey
+    ) {
         this.pedidoService = pedidoService;
+        this.internalApiKey = internalApiKey;
     }
 
     // 1. Obtener pedido por ID
@@ -94,8 +103,19 @@ public class PedidoController {
 
     @PostMapping("/checkout-interno")
     public ResponseEntity<PedidoResponse> crearCompraInterna(
+            @RequestHeader(
+                    value = "X-Internal-Api-Key",
+                    required = false
+            ) String apiKey,
             @Valid @RequestBody PedidoCompraInternaRequest request
     ) {
+        if (apiKey == null || !MessageDigest.isEqual(
+                internalApiKey.getBytes(StandardCharsets.UTF_8),
+                apiKey.getBytes(StandardCharsets.UTF_8)
+        )) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         PedidoResponse creado = pedidoService.crearCompraInterna(request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(creado);
