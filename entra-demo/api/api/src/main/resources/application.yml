@@ -16,3 +16,5 @@ microservices:
     base-url: http://localhost:8082 #http://10.0.2.157:8082
   catalogo:
     base-url: http://localhost:8083 #http://IP_PRIVADA_CATALOGO:8083
+internal:
+  api-key: "Pedidos360-local-8f4c9b7e2a6d"
