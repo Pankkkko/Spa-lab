@@ -1,4 +1,4 @@
-package cl.duoc.mspedidos.config;
+/*package cl.duoc.mspedidos.config;
 
 import java.time.LocalDate;
 
@@ -19,7 +19,7 @@ public class DataInitializer {
             if (repository.count() == 0) {
                 // Pedido 1: DESPACHADO
                 Pedido p1 = new Pedido(1L, "DESPACHADO", LocalDate.of(2026, 9, 1));
-                p1.agregarDetalle(new PedidoDetalle("Notebook Lenovo", 1, 749990.0));
+                p1.agregarDetalle(new PedidoDetalle("Izhmash AKM", 1, 499990.0));
                 p1.agregarDetalle(new PedidoDetalle("Mouse Logitech", 2, 29990.0));
                 repository.save(p1);
 
@@ -40,4 +40,4 @@ public class DataInitializer {
             }
         };
     }
-}
+}*/

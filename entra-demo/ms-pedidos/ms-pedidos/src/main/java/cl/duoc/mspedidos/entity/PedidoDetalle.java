@@ -1,4 +1,8 @@
+
 package cl.duoc.mspedidos.entity;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,22 +32,39 @@ public class PedidoDetalle {
     @Column(nullable = false)
     private Integer cantidad;
 
-    @Column(name = "precio_unitario", nullable = false)
-    private Double precioUnitario;
+    @Column(name = "precio_unitario", nullable = false, precision = 12, scale = 2)
+    private BigDecimal precioUnitario;
 
-    @Column(nullable = false)
-    private Double subtotal;
+    @Column(nullable = false, precision = 14, scale = 2)
+    private BigDecimal subtotal;
 
     public PedidoDetalle() {}
 
-    public PedidoDetalle(String producto, Integer cantidad, Double precioUnitario) {
+    public PedidoDetalle(
+            String producto,
+            Integer cantidad,
+            BigDecimal precioUnitario
+    ) {
+        if (producto == null || producto.isBlank()) {
+            throw new IllegalArgumentException("El producto es obligatorio");
+        }
+
+        if (cantidad == null || cantidad <= 0) {
+            throw new IllegalArgumentException("La cantidad debe ser mayor que cero");
+        }
+
+        if (precioUnitario == null || precioUnitario.signum() <= 0) {
+            throw new IllegalArgumentException("El precio debe ser mayor que cero");
+        }
+
         this.producto = producto;
         this.cantidad = cantidad;
-        this.precioUnitario = precioUnitario;
-        this.subtotal = cantidad * precioUnitario;
+        this.precioUnitario = precioUnitario.setScale(2, RoundingMode.HALF_UP);
+        this.subtotal = this.precioUnitario
+                .multiply(BigDecimal.valueOf(cantidad))
+                .setScale(2, RoundingMode.HALF_UP);
     }
 
-    // Getters y Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -56,9 +77,11 @@ public class PedidoDetalle {
     public Integer getCantidad() { return cantidad; }
     public void setCantidad(Integer cantidad) { this.cantidad = cantidad; }
 
-    public Double getPrecioUnitario() { return precioUnitario; }
-    public void setPrecioUnitario(Double precioUnitario) { this.precioUnitario = precioUnitario; }
+    public BigDecimal getPrecioUnitario() { return precioUnitario; }
+    public void setPrecioUnitario(BigDecimal precioUnitario) {
+        this.precioUnitario = precioUnitario;
+    }
 
-    public Double getSubtotal() { return subtotal; }
-    public void setSubtotal(Double subtotal) { this.subtotal = subtotal; }
+    public BigDecimal getSubtotal() { return subtotal; }
+    public void setSubtotal(BigDecimal subtotal) { this.subtotal = subtotal; }
 }

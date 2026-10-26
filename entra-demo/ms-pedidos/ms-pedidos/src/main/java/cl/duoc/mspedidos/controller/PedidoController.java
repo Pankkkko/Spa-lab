@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import cl.duoc.mspedidos.dto.PedidoCompraInternaRequest;
 import cl.duoc.mspedidos.dto.PedidoResponse;
 import cl.duoc.mspedidos.service.PedidoService;
 import jakarta.validation.Valid;
@@ -89,5 +90,14 @@ public class PedidoController {
             nuevoEstado = body.get("estado");
         }
         return ResponseEntity.ok(pedidoService.cambiarEstado(id, nuevoEstado));
+    }
+
+    @PostMapping("/checkout-interno")
+    public ResponseEntity<PedidoResponse> crearCompraInterna(
+            @Valid @RequestBody PedidoCompraInternaRequest request
+    ) {
+        PedidoResponse creado = pedidoService.crearCompraInterna(request);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(creado);
     }
 }

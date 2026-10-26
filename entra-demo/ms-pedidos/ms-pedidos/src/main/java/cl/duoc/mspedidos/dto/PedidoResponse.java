@@ -1,6 +1,7 @@
 
 package cl.duoc.mspedidos.dto;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -19,8 +20,8 @@ public record PedidoResponse(
     String clienteNombre,
     String estado,
     LocalDate fecha,
-    Double total,
+    BigDecimal total,
 
     @NotEmpty(message = "El pedido debe contener al menos un producto")
     List<@Valid PedidoDetalleResponse> detalles
-) { }
+) {}

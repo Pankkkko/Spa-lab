@@ -1,8 +1,11 @@
+
 package cl.duoc.mspedidos.dto;
+
+import java.math.BigDecimal;
 
 public record PedidoDetalleResponse(
     String producto,
     Integer cantidad,
-    Double precioUnitario,
-    Double subtotal
-) { }
+    BigDecimal precioUnitario,
+    BigDecimal subtotal
+) {}

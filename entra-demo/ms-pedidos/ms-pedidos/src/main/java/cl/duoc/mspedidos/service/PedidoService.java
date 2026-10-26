@@ -1,5 +1,6 @@
 package cl.duoc.mspedidos.service;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -10,9 +11,12 @@ import java.util.stream.Collectors;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import cl.duoc.mspedidos.config.RabbitMQConfig;
 import cl.duoc.mspedidos.dto.ComandoEnvelope;
+import cl.duoc.mspedidos.dto.PedidoCompraInternaRequest;
+import cl.duoc.mspedidos.dto.PedidoDetalleCompraInternaRequest;
 import cl.duoc.mspedidos.dto.PedidoDetalleResponse;
 import cl.duoc.mspedidos.dto.PedidoResponse;
 import cl.duoc.mspedidos.entity.Pedido;
@@ -95,8 +99,8 @@ public class PedidoService {
 
     public PedidoResponse cambiarEstado(Long id, String nuevoEstado) {
         Pedido pedido = pedidoRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("Pedido no encontrado: " + id));
+                .orElseThrow(()
+                        -> new RuntimeException("Pedido no encontrado: " + id));
 
         PedidoEstado.validarTransicion(
                 pedido.getEstado(),
@@ -117,8 +121,8 @@ public class PedidoService {
 
     public PedidoResponse buscarPorId(Long id) {
         Pedido pedido = pedidoRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("Pedido no encontrado: " + id));
+                .orElseThrow(()
+                        -> new RuntimeException("Pedido no encontrado: " + id));
 
         return toResponse(pedido);
     }
@@ -157,8 +161,8 @@ public class PedidoService {
 
     public PedidoResponse editarPedido(Long id, PedidoResponse request) {
         Pedido pedido = pedidoRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("Pedido no encontrado: " + id));
+                .orElseThrow(()
+                        -> new RuntimeException("Pedido no encontrado: " + id));
 
         String estadoAnterior = pedido.getEstado();
 
@@ -173,8 +177,8 @@ public class PedidoService {
 
         pedido.setFecha(
                 request.fecha() != null
-                        ? request.fecha()
-                        : LocalDate.now()
+                ? request.fecha()
+                : LocalDate.now()
         );
 
         pedido.getDetalles().clear();
@@ -202,10 +206,71 @@ public class PedidoService {
 
     public void eliminarPedido(Long id) {
         Pedido pedido = pedidoRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("Pedido no encontrado: " + id));
+                .orElseThrow(()
+                        -> new RuntimeException("Pedido no encontrado: " + id));
 
         pedidoRepository.delete(pedido);
+    }
+
+    @Transactional
+    public PedidoResponse crearCompraInterna(
+            PedidoCompraInternaRequest request
+    ) {
+        if (request.detalles() == null || request.detalles().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "El pedido debe contener al menos un producto"
+            );
+        }
+
+        Pedido pedido = new Pedido(
+                request.clienteId(),
+                PedidoEstado.CREADO.name(),
+                LocalDate.now()
+        );
+
+        for (PedidoDetalleCompraInternaRequest detalle : request.detalles()) {
+            pedido.agregarDetalle(
+                    new PedidoDetalle(
+                            detalle.producto(),
+                            detalle.cantidad(),
+                            detalle.precioUnitario()
+                    )
+            );
+        }
+
+        Pedido guardado = pedidoRepository.saveAndFlush(pedido);
+
+        String traceId = UUID.randomUUID().toString();
+        String correlationId = UUID.randomUUID().toString();
+
+        publicarComando(
+                RabbitMQConfig.EXCHANGE_DIRECT,
+                RabbitMQConfig.KEY_EMAIL,
+                "EmailSolicitud",
+                guardado,
+                traceId,
+                correlationId
+        );
+
+        publicarComando(
+                RabbitMQConfig.EXCHANGE_DIRECT,
+                RabbitMQConfig.KEY_PEDIDOS,
+                "PedidoProcesar",
+                guardado,
+                traceId,
+                correlationId
+        );
+
+        publicarComando(
+                RabbitMQConfig.EXCHANGE_DIRECT,
+                RabbitMQConfig.KEY_INVOICE,
+                "FacturaGenerar",
+                guardado,
+                traceId,
+                correlationId
+        );
+
+        return toResponse(guardado);
     }
 
     private void publicarCambioEstado(Pedido pedido) {
@@ -259,9 +324,9 @@ public class PedidoService {
                 ))
                 .toList();
 
-        double total = detalles.stream()
-                .mapToDouble(PedidoDetalleResponse::subtotal)
-                .sum();
+        BigDecimal total = detalles.stream()
+                .map(PedidoDetalleResponse::subtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         return Map.of(
                 "pedidoId", pedido.getId(),
@@ -274,25 +339,28 @@ public class PedidoService {
     }
 
     private PedidoResponse toResponse(Pedido pedido) {
+        List<PedidoDetalleResponse> detalles = pedido.getDetalles()
+                .stream()
+                .map(detalle -> new PedidoDetalleResponse(
+                        detalle.getProducto(),
+                        detalle.getCantidad(),
+                        detalle.getPrecioUnitario(),
+                        detalle.getSubtotal()
+                ))
+                .collect(Collectors.toList());
+
+        BigDecimal total = detalles.stream()
+                .map(PedidoDetalleResponse::subtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         return new PedidoResponse(
                 pedido.getId(),
                 pedido.getClienteId(),
                 null,
                 PedidoEstado.validar(pedido.getEstado()),
                 pedido.getFecha(),
-                pedido.getDetalles()
-                        .stream()
-                        .mapToDouble(PedidoDetalle::getSubtotal)
-                        .sum(),
-                pedido.getDetalles()
-                        .stream()
-                        .map(detalle -> new PedidoDetalleResponse(
-                                detalle.getProducto(),
-                                detalle.getCantidad(),
-                                detalle.getPrecioUnitario(),
-                                detalle.getSubtotal()
-                        ))
-                        .collect(Collectors.toList())
+                total,
+                detalles
         );
     }
 }
