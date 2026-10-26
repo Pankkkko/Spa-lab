@@ -6,7 +6,7 @@ import OrdersModal from "../components/OrdersModal";
 // 🔧 DEBUG DE EVALUACIÓN
 // Se mantiene comentado para poder activarlo rápidamente.
 //
-// import TokenDebugButton from "../components/TokenDebugButton";
+ import TokenDebugButton from "../components/TokenDebugButton";
 
 import { obtenerPedidos } from "../api/pedidosApi";
 import type { Pedido } from "../api/pedidosApi";
@@ -455,6 +455,7 @@ function HomePage({
                 onEliminar={eliminarProducto}
                 onVaciar={vaciarCarrito}
             />
+            {isAuthenticated && <TokenDebugButton />}
         </main>
     );
 }

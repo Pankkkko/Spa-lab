@@ -1,0 +1,154 @@
+
+.perfil-cliente-page {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 28px 16px;
+    color: #0c3b45;
+    background:
+        radial-gradient(circle at top left, #cff0ea 0, transparent 42%),
+        linear-gradient(145deg, #f7fbfa, #e8f8f5);
+}
+
+.perfil-cliente-card {
+    width: 100%;
+    max-width: 480px;
+    padding: 36px;
+    background: #ffffff;
+    border: 1px solid #cff0ea;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(12, 59, 69, 0.12);
+}
+
+.perfil-cliente-etiqueta {
+    color: #20666b;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+}
+
+.perfil-cliente-icono {
+    display: grid;
+    width: 64px;
+    height: 64px;
+    place-items: center;
+    margin-top: 24px;
+    background: #e8f8f5;
+    border-radius: 18px;
+    font-size: 1.8rem;
+}
+
+.perfil-cliente-card h1 {
+    margin: 20px 0 10px;
+    font-size: clamp(1.6rem, 5vw, 2rem);
+}
+
+.perfil-cliente-descripcion {
+    margin: 0 0 24px;
+    color: #647d80;
+    line-height: 1.6;
+}
+
+.perfil-cliente-cuenta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 24px;
+    padding: 14px;
+    overflow-wrap: anywhere;
+    background: #f3f9f8;
+    border: 1px solid #dceae7;
+    border-radius: 10px;
+}
+
+.perfil-cliente-cuenta span,
+.perfil-cliente-card label span {
+    color: #71888a;
+    font-size: 0.85rem;
+    font-weight: 400;
+}
+
+.perfil-cliente-card form {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.perfil-cliente-card label {
+    margin-top: 8px;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.perfil-cliente-card input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 13px 14px;
+    color: #0c3b45;
+    background: #ffffff;
+    border: 1px solid #cbdedb;
+    border-radius: 9px;
+    font: inherit;
+}
+
+.perfil-cliente-card input:focus {
+    border-color: #3e9b94;
+    outline: 3px solid rgba(62, 155, 148, 0.15);
+}
+
+.perfil-cliente-error {
+    padding: 12px;
+    color: #8d2929;
+    background: #fff0f0;
+    border: 1px solid #f1cccc;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.perfil-cliente-submit {
+    margin-top: 14px;
+    padding: 14px 18px;
+    color: #ffffff;
+    background: #20666b;
+    border: 0;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.perfil-cliente-submit:hover:not(:disabled) {
+    background: #0c3b45;
+}
+
+.perfil-cliente-submit:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
+.perfil-cliente-logout {
+    display: block;
+    margin: 16px auto 0;
+    padding: 8px;
+    color: #647d80;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+}
+
+.perfil-cliente-logout:hover {
+    color: #0c3b45;
+    text-decoration: underline;
+}
+
+.perfil-cliente-card button:focus-visible {
+    outline: 3px solid #3e9b94;
+    outline-offset: 3px;
+}
+
+@media (max-width: 480px) {
+    .perfil-cliente-card {
+        padding: 26px 22px;
+    }
+}

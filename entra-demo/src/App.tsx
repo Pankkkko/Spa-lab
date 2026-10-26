@@ -6,9 +6,22 @@ import LoginPage from './pages/LoginPage';
 import HomePage from './pages/HomePage';
 import AdminPage from './pages/AdminPage';
 import CatalogoPage from './pages/CatalogoPage';
+import PerfilClientePage from './pages/PerfilClientePage';
+
+import {
+    ClienteApiError,
+    obtenerMiPerfil,
+} from './api/clienteApi';
 
 import { obtenerRolUsuario } from './roles';
 import type { UserRole } from './roles';
+
+type EstadoPerfil =
+    | 'no-aplica'
+    | 'cargando'
+    | 'completo'
+    | 'requiere-registro'
+    | 'error';
 
 function App() {
     const isAuthenticated = useIsAuthenticated();
@@ -20,6 +33,11 @@ function App() {
     const [userRole, setUserRole] = useState<UserRole>(null);
     const [cargandoRol, setCargandoRol] = useState(false);
 
+    const [estadoPerfil, setEstadoPerfil] =
+        useState<EstadoPerfil>('no-aplica');
+
+    const [intentoPerfil, setIntentoPerfil] = useState(0);
+
     function handleLogin() {
         setShowLogin(true);
         setShowCatalogo(false);
@@ -27,6 +45,7 @@ function App() {
 
     function handleLogout() {
         setUserRole(null);
+        setEstadoPerfil('no-aplica');
         setShowLogin(false);
         setShowCatalogo(false);
 
@@ -96,7 +115,67 @@ function App() {
         };
     }, [isAuthenticated, instance, accounts]);
 
-    // Mostrar el catálogo es independiente de la autenticación.
+    useEffect(() => {
+        if (!isAuthenticated || userRole !== 'Cliente') {
+            setEstadoPerfil('no-aplica');
+            return;
+        }
+
+        const account =
+            instance.getActiveAccount() ?? accounts[0];
+
+        if (!account) {
+            setEstadoPerfil('error');
+            return;
+        }
+
+        let cancelado = false;
+
+        async function comprobarPerfil() {
+            setEstadoPerfil('cargando');
+
+            try {
+                await obtenerMiPerfil(instance, account!);
+
+                if (!cancelado) {
+                    setEstadoPerfil('completo');
+                }
+            } catch (error) {
+                if (cancelado) {
+                    return;
+                }
+
+                if (
+                    error instanceof ClienteApiError &&
+                    (error.status === 403 || error.status === 404)
+                ) {
+                    setEstadoPerfil('requiere-registro');
+                    return;
+                }
+
+                console.error(
+                    'Error al comprobar el perfil del cliente:',
+                    error,
+                );
+
+                setEstadoPerfil('error');
+            }
+        }
+
+        void comprobarPerfil();
+
+        return () => {
+            cancelado = true;
+        };
+    }, [
+        isAuthenticated,
+        userRole,
+        instance,
+        accounts,
+        intentoPerfil,
+    ]);
+
+    // El catálogo sigue siendo accesible sin iniciar sesión.
     if (showCatalogo) {
         return (
             <CatalogoPage
@@ -108,12 +187,10 @@ function App() {
         );
     }
 
-    // La pantalla de login solo aparece si el visitante la solicita.
     if (!isAuthenticated && showLogin) {
         return <LoginPage onBack={handleBackToHome} />;
     }
 
-    // Vista pública para visitantes sin sesión.
     if (!isAuthenticated) {
         return (
             <HomePage
@@ -125,7 +202,6 @@ function App() {
         );
     }
 
-    // Mientras se verifica el rol, no mostramos páginas privadas.
     if (cargandoRol) {
         return (
             <main>
@@ -139,6 +215,84 @@ function App() {
     }
 
     if (userRole === 'Cliente') {
+        if (estadoPerfil === 'cargando' ||
+            estadoPerfil === 'no-aplica') {
+            return (
+                <main className="perfil-cliente-page">
+                    <section className="perfil-cliente-card">
+                        <h1>Verificando tu perfil...</h1>
+                        <p>
+                            Estamos comprobando los datos de tu cuenta.
+                        </p>
+                    </section>
+                </main>
+            );
+        }
+
+        if (estadoPerfil === 'requiere-registro') {
+            const account =
+                instance.getActiveAccount() ?? accounts[0];
+
+            if (!account) {
+                return (
+                    <main>
+                        <h1>No se encontró la cuenta activa</h1>
+                        <button
+                            type="button"
+                            onClick={handleLogout}
+                        >
+                            Cerrar sesión
+                        </button>
+                    </main>
+                );
+            }
+
+            return (
+                <PerfilClientePage
+                    instance={instance}
+                    account={account}
+                    onPerfilCreado={() => {
+                        setEstadoPerfil('completo');
+                    }}
+                    onLogout={handleLogout}
+                />
+            );
+        }
+
+        if (estadoPerfil === 'error') {
+            return (
+                <main className="perfil-cliente-page">
+                    <section className="perfil-cliente-card">
+                        <h1>No pudimos verificar tu perfil</h1>
+
+                        <p>
+                            No pudimos consultar tus datos.
+                            Comprueba que el BFF y ms-clientes
+                            estén funcionando e inténtalo otra vez.
+                        </p>
+
+                        <button
+                            className="perfil-cliente-submit"
+                            type="button"
+                            onClick={() => {
+                                setIntentoPerfil((actual) => actual + 1);
+                            }}
+                        >
+                            Reintentar
+                        </button>
+
+                        <button
+                            className="perfil-cliente-logout"
+                            type="button"
+                            onClick={handleLogout}
+                        >
+                            Cerrar sesión
+                        </button>
+                    </section>
+                </main>
+            );
+        }
+
         return (
             <HomePage
                 isAuthenticated={true}
