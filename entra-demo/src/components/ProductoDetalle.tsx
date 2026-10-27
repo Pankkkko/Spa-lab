@@ -1,5 +1,6 @@
 
 import type { Producto } from '../api/catalogoApi';
+import { useEffect, useState } from 'react';
 
 interface ProductoDetalleProps {
     producto: Producto;
@@ -14,6 +15,16 @@ export default function ProductoDetalle({
     onAgregarAlCarrito,
     onComprarAhora,
 }: ProductoDetalleProps) {
+    const [imagenSeleccionada, setImagenSeleccionada] = useState(0);
+
+    const imagenes = (producto.imagenes ?? []).filter(
+        (imagen) => typeof imagen === 'string' && imagen.trim() !== ''
+    );
+
+    useEffect(() => {
+        setImagenSeleccionada(0);
+    }, [producto.sku]);
+
     const formatearPrecio = (precio: number) =>
         new Intl.NumberFormat('es-CL', {
             style: 'currency',
@@ -22,6 +33,18 @@ export default function ProductoDetalle({
         }).format(precio);
 
     const agotado = producto.stock <= 0;
+
+    const imagenAnterior = () => {
+        setImagenSeleccionada((actual) =>
+            (actual - 1 + imagenes.length) % imagenes.length
+        );
+    };
+
+    const imagenSiguiente = () => {
+        setImagenSeleccionada((actual) =>
+            (actual + 1) % imagenes.length
+        );
+    };
 
     return (
         <main className="producto-detalle">
@@ -35,20 +58,73 @@ export default function ProductoDetalle({
 
             <section className="detalle-contenido">
                 <div className="detalle-imagen">
-                    {producto.imagenes?.length > 0 ? (
-                        <img
-                            src={producto.imagenes[0]}
-                            alt={producto.nombre}
-                        />
-                    ) : (
-                        <div className="detalle-imagen-placeholder">
-                            AIRSOFT
-                        </div>
-                    )}
+                    <div className="detalle-galeria">
+                        <div className="detalle-imagen-principal">
+                            {imagenes.length > 0 ? (
+                                <img
+                                    src={imagenes[imagenSeleccionada]}
+                                    alt={`${producto.nombre}, imagen ${imagenSeleccionada + 1}`}
+                                />
+                            ) : (
+                                <div className="detalle-imagen-placeholder">
+                                    AIRSOFT
+                                </div>
+                            )}
 
-                    <span className="detalle-categoria">
-                        {producto.categoria}
-                    </span>
+                            {imagenes.length > 1 && (
+                                <>
+                                    <button
+                                        type="button"
+                                        className="detalle-flecha detalle-flecha-izquierda"
+                                        onClick={imagenAnterior}
+                                        aria-label="Imagen anterior"
+                                    >
+                                        ‹
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        className="detalle-flecha detalle-flecha-derecha"
+                                        onClick={imagenSiguiente}
+                                        aria-label="Imagen siguiente"
+                                    >
+                                        ›
+                                    </button>
+                                </>
+                            )}
+                        </div>
+
+                        {imagenes.length > 1 && (
+                            <div className="detalle-miniaturas">
+                                {imagenes.map((imagen, indice) => (
+                                    <button
+                                        key={`${producto.sku}-${indice}`}
+                                        type="button"
+                                        className={`detalle-miniatura ${
+                                            indice === imagenSeleccionada
+                                                ? 'activa'
+                                                : ''
+                                        }`}
+                                        onClick={() =>
+                                            setImagenSeleccionada(indice)
+                                        }
+                                        aria-label={`Ver imagen ${indice + 1}`}
+                                        aria-pressed={
+                                            indice === imagenSeleccionada
+                                        }
+                                    >
+                                        <img
+                                            src={imagen}
+                                            alt=""
+                                            loading="lazy"
+                                        />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    
                 </div>
 
                 <div className="detalle-informacion">

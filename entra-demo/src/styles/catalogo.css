@@ -1253,3 +1253,272 @@
 .detalle-acciones .btn-comprar:disabled {
     filter: none !important;
 }
+
+.detalle-galeria {
+    width: 100%;
+    min-width: 0;
+}
+
+.detalle-imagen-principal {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 280px;
+    overflow: hidden;
+    border-radius: 16px;
+    background: #f0f5f4;
+}
+
+.detalle-imagen-principal > img {
+    display: block;
+    width: 100%;
+    max-height: 440px;
+    aspect-ratio: 4 / 3;
+    object-fit: contain;
+}
+
+.detalle-flecha {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(12, 59, 69, 0.88);
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.detalle-flecha:hover {
+    background: #20666b;
+    transform: translateY(-50%) scale(1.08);
+}
+
+.detalle-flecha-izquierda {
+    left: 12px;
+}
+
+.detalle-flecha-derecha {
+    right: 12px;
+}
+
+.detalle-miniaturas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.detalle-miniatura {
+    width: 68px;
+    height: 68px;
+    padding: 3px;
+    overflow: hidden;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.2s, opacity 0.2s;
+}
+
+.detalle-miniatura:hover {
+    border-color: #88c9c4;
+}
+
+.detalle-miniatura.activa {
+    border-color: #20666b;
+}
+
+.detalle-miniatura img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 6px;
+}
+
+
+/* =========================
+   CORRECCIÓN GALERÍA PRODUCTO
+========================= */
+
+/* Contenedor exterior: ahora puede crecer para incluir miniaturas */
+.producto-detalle .detalle-imagen {
+    position: relative;
+    display: block;
+    min-width: 0;
+    min-height: 0;
+    height: auto;
+    overflow: visible;
+    border-radius: 0;
+    background: transparent;
+}
+
+/* Imagen principal y su fondo */
+.producto-detalle .detalle-imagen-principal {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    height: 420px;
+    min-height: 0;
+
+    overflow: hidden;
+    border-radius: 15px;
+
+    background: linear-gradient(135deg, #e7f5f3, #cff0ea);
+}
+
+/* Evita que las reglas antiguas afecten a la imagen principal */
+.producto-detalle .detalle-imagen-principal > img {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+
+    aspect-ratio: auto;
+    object-fit: contain;
+}
+
+/* Etiqueta de categoría encima de la imagen principal */
+.producto-detalle .detalle-categoria {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    z-index: 2;
+
+    padding: 8px 12px;
+    border-radius: 8px;
+
+    background: rgba(12, 59, 69, 0.92);
+    color: white;
+
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+/* Galería de miniaturas */
+.producto-detalle .detalle-miniaturas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+
+    width: 100%;
+    margin-top: 14px;
+    padding: 2px 0;
+}
+
+/* Cada miniatura conserva sus dimensiones */
+.producto-detalle .detalle-miniatura {
+    display: flex;
+    flex: 0 0 68px;
+    align-items: center;
+    justify-content: center;
+
+    width: 68px;
+    height: 68px;
+    min-height: 0;
+    box-sizing: border-box;
+
+    padding: 3px;
+    overflow: hidden;
+
+    border: 2px solid transparent;
+    border-radius: 10px;
+
+    background: white;
+    cursor: pointer;
+
+    transition: border-color 0.2s, opacity 0.2s;
+}
+
+/* Anula específicamente el tamaño gigante de .detalle-imagen img */
+.producto-detalle .detalle-miniatura img {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+
+    aspect-ratio: auto;
+    object-fit: contain;
+    border-radius: 6px;
+}
+
+.producto-detalle .detalle-miniatura:hover {
+    border-color: #88c9c4;
+}
+
+.producto-detalle .detalle-miniatura.activa {
+    border-color: #20666b;
+}
+
+/* Flechas de navegación */
+.producto-detalle .detalle-flecha {
+    z-index: 1;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+
+    border: none;
+    border-radius: 50%;
+
+    background: rgba(12, 59, 69, 0.88);
+    color: white;
+
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.producto-detalle .detalle-flecha:hover {
+    background: #20666b;
+}
+
+/* Imagen de respaldo cuando el producto no tiene imágenes */
+.producto-detalle .detalle-imagen-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    height: 100%;
+
+    color: #3e9b94;
+    font-size: 1rem;
+    font-weight: 900;
+    letter-spacing: 0.2em;
+}
+
+/* Adaptación para pantallas pequeñas */
+@media (max-width: 800px) {
+    .producto-detalle .detalle-imagen-principal {
+        height: 300px;
+    }
+}
+
+@media (max-width: 550px) {
+    .producto-detalle .detalle-imagen-principal {
+        height: 240px;
+    }
+
+    .producto-detalle .detalle-miniatura {
+        flex-basis: 58px;
+        width: 58px;
+        height: 58px;
+    }
+}

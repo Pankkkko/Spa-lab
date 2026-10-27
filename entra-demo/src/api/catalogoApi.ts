@@ -18,6 +18,16 @@ export interface Producto {
     stock: number;
 }
 
+export interface ProductoRequest {
+    sku: string;
+    nombre: string;
+    descripcion: string;
+    categoria: string;
+    precio: number;
+    imagenes: string[];
+    stock: number;
+}
+
 export interface ProductoPage {
     content: Producto[];
     totalElements: number;
@@ -328,4 +338,71 @@ export async function realizarCheckout(
     }
 
     return JSON.parse(body) as PedidoCreado;
+}
+
+// =========================================================
+// CREAR PRODUCTO (ADMIN)
+// =========================================================
+export async function crearProducto(
+    instance: IPublicClientApplication,
+    account: AccountInfo,
+    producto: ProductoRequest,
+): Promise<Producto> {
+    const token = await obtenerTokenCatalogo(instance, account);
+
+    const response = await fetch(`${BFF_BASE_URL}/productos`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(producto),
+    });
+
+    const body = await response.text();
+
+    if (!response.ok) {
+        throw new Error(
+            `Error al crear el producto. HTTP ${response.status}: ${body}`,
+        );
+    }
+
+    return JSON.parse(body) as Producto;
+}
+
+// =========================================================
+// EDITAR PRODUCTO (ADMIN)
+// =========================================================
+export async function actualizarProducto(
+    instance: IPublicClientApplication,
+    account: AccountInfo,
+    sku: string,
+    producto: ProductoRequest,
+): Promise<Producto> {
+    const token = await obtenerTokenCatalogo(instance, account);
+
+    const response = await fetch(
+        `${BFF_BASE_URL}/productos/${encodeURIComponent(sku)}`,
+        {
+            method: 'PUT',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                ...producto,
+                sku,
+            }),
+        },
+    );
+
+    const body = await response.text();
+
+    if (!response.ok) {
+        throw new Error(
+            `Error al actualizar el producto. HTTP ${response.status}: ${body}`,
+        );
+    }
+
+    return JSON.parse(body) as Producto;
 }
