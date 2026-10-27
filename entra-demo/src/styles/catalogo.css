@@ -1134,8 +1134,15 @@
 }
 
 .btn-comprar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    border-color: #a9d9d4 !important;
     background: #20666b;
     color: white;
+    
 }
 
 .btn-carrito {
@@ -1218,4 +1225,31 @@
     opacity: 0.55;
     filter: grayscale(0.2);
     transform: none;
+}
+
+.detalle-acciones .btn-comprar:not(:disabled) {
+    background-color: #20666b !important;
+    color: #ffffff !important;
+    opacity: 1 !important;
+    filter: none !important;
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    box-shadow: none;
+}
+
+.detalle-acciones .btn-comprar:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+}
+
+.detalle-acciones .btn-comprar:not(:disabled):hover {
+    filter: brightness(1.12) !important;
+}
+
+.detalle-acciones .btn-comprar:not(:disabled):active {
+    filter: brightness(0.92) !important;
+}
+
+.detalle-acciones .btn-comprar:disabled {
+    filter: none !important;
 }

@@ -5,12 +5,14 @@ interface ProductoDetalleProps {
     producto: Producto;
     onVolver: () => void;
     onAgregarAlCarrito: (producto: Producto) => void;
+    onComprarAhora: (producto: Producto) => void;
 }
 
 export default function ProductoDetalle({
     producto,
     onVolver,
     onAgregarAlCarrito,
+    onComprarAhora,
 }: ProductoDetalleProps) {
     const formatearPrecio = (precio: number) =>
         new Intl.NumberFormat('es-CL', {
@@ -92,10 +94,13 @@ export default function ProductoDetalle({
                         <button
                             type="button"
                             className="btn-comprar"
-                            disabled
-                            title="Funcionalidad próximamente"
+                            disabled={agotado}
+                            onClick={() => onComprarAhora(producto)}
                         >
-                            Comprar
+                            <span aria-hidden="true">🛒</span>
+                            {agotado
+                                ? 'Producto agotado'
+                                : 'Comprar ahora'}
                         </button>
 
                         <button
@@ -112,8 +117,9 @@ export default function ProductoDetalle({
                     </div>
 
                     <p className="detalle-nota">
-                        Puedes agregar productos sin iniciar sesión.
-                        La compra y el pago aún no están habilitados.
+                        Puedes explorar el catálogo sin iniciar sesión.
+                        Para confirmar tu compra debes iniciar sesión.
+                        El pago real todavía no está habilitado.
                     </p>
                 </div>
             </section>

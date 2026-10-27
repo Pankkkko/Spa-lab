@@ -10,6 +10,7 @@ interface CarritoModalProps {
     onCambiarCantidad: (sku: string, cantidad: number) => void;
     onEliminar: (sku: string) => void;
     onVaciar: () => void;
+    onCheckout: () => void;
 }
 
 function formatearPrecio(precio: number): string {
@@ -27,6 +28,7 @@ export default function CarritoModal({
     onCambiarCantidad,
     onEliminar,
     onVaciar,
+    onCheckout,
 }: CarritoModalProps) {
     useEffect(() => {
         if (!abierto) {
@@ -81,11 +83,10 @@ export default function CarritoModal({
                         <p>
                             {items.length === 0
                                 ? 'Todavía no has agregado productos.'
-                                : `${items.length} ${
-                                      items.length === 1
-                                          ? 'producto diferente'
-                                          : 'productos diferentes'
-                                  }`}
+                                : `${items.length} ${items.length === 1
+                                    ? 'producto diferente'
+                                    : 'productos diferentes'
+                                }`}
                         </p>
                     </div>
 
@@ -224,17 +225,17 @@ export default function CarritoModal({
                             </div>
 
                             <p className="carrito-aviso">
-                                El total es referencial. La compra y el pago
-                                todavía no están habilitados.
+                                El precio es referencial. El servidor validará los precios
+                                y el stock al confirmar tu compra.
                             </p>
 
                             <button
                                 type="button"
                                 className="carrito-comprar"
-                                disabled
-                                title="Funcionalidad próximamente"
+                                disabled={items.length === 0}
+                                onClick={onCheckout}
                             >
-                                Comprar próximamente
+                                Continuar al checkout
                             </button>
                         </footer>
                     </>

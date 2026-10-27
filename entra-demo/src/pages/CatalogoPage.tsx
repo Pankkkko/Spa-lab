@@ -15,8 +15,9 @@ import ProductoCard from '../components/ProductoCard';
 import CatalogoEstado from '../components/CatalogoEstado';
 import ProductoDetalle from '../components/ProductoDetalle';
 import CarritoModal from '../components/CarritoModal';
-import { useCarrito } from '../hooks/useCarrito';
+import CheckoutPage from '../pages/CheckoutPage';
 
+import { useCarrito } from '../hooks/useCarrito';
 import '../styles/catalogo.css';
 
 interface CatalogoProps {
@@ -43,6 +44,7 @@ export default function CatalogoPage({
     const [productoSeleccionado, setProductoSeleccionado] =
         useState<Producto | null>(null);
     const [carritoAbierto, setCarritoAbierto] = useState(false);
+    const [checkoutAbierto, setCheckoutAbierto] = useState(false);
 
     const {
         items,
@@ -53,6 +55,9 @@ export default function CatalogoPage({
         vaciarCarrito,
         reconciliarStock,
     } = useCarrito();
+
+    const cuentaActual =
+        instance.getActiveAccount() ?? accounts[0] ?? null;
 
     useEffect(() => {
         let cancelado = false;
@@ -127,25 +132,43 @@ export default function CatalogoPage({
         }
     };
 
+    const manejarComprarAhora = (producto: Producto) => {
+        const agregado = agregarProducto(producto);
+
+        if (agregado) {
+            setCarritoAbierto(false);
+            setCheckoutAbierto(true);
+        }
+    };
+
+    const manejarIrAlCheckout = () => {
+        setCarritoAbierto(false);
+        setCheckoutAbierto(true);
+    };
+
+    const manejarVolverDelCheckout = () => {
+        setCheckoutAbierto(false);
+    };
+
     return (
         <div className="catalogo-page">
-
             <CatalogoNavbar
                 isAuthenticated={isAuthenticated}
                 nombreUsuario={
-                    (instance.getActiveAccount() ?? accounts[0])?.name ??
-                    (instance.getActiveAccount() ?? accounts[0])?.username
+                    cuentaActual?.name ?? cuentaActual?.username
                 }
                 cantidadCarrito={cantidadTotal}
                 paginaActual="catalogo"
                 onInicio={onBack}
-                onCatalogo={() => { }}
+                onCatalogo={() => {
+                    setCheckoutAbierto(false);
+                    setProductoSeleccionado(null);
+                }}
                 onAbrirPedidos={onBack}
                 onLogin={onLogin}
                 onLogout={onLogout}
                 onAbrirCarrito={() => setCarritoAbierto(true)}
             />
-
 
             {cargando ? (
                 <CatalogoEstado tipo="cargando" />
@@ -154,6 +177,15 @@ export default function CatalogoPage({
                     tipo="error"
                     mensaje={error}
                     onReintentar={() => window.location.reload()}
+                />
+            ) : checkoutAbierto ? (
+                <CheckoutPage
+                    items={items}
+                    instance={instance}
+                    account={cuentaActual}
+                    onVolver={manejarVolverDelCheckout}
+                    onLogin={onLogin}
+                    onCompraExitosa={vaciarCarrito}
                 />
             ) : productoSeleccionado ? (
                 <ProductoDetalle
@@ -165,6 +197,7 @@ export default function CatalogoPage({
                     }
                     onVolver={() => setProductoSeleccionado(null)}
                     onAgregarAlCarrito={manejarAgregarAlCarrito}
+                    onComprarAhora={manejarComprarAhora}
                 />
             ) : (
                 <>
@@ -207,6 +240,7 @@ export default function CatalogoPage({
                 onCambiarCantidad={cambiarCantidad}
                 onEliminar={eliminarProducto}
                 onVaciar={vaciarCarrito}
+                onCheckout={manejarIrAlCheckout}
             />
         </div>
     );

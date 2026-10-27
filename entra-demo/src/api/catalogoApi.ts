@@ -29,6 +29,25 @@ export interface ProductoPage {
     last: boolean;
     empty: boolean;
 }
+export interface CheckoutItemRequest {
+    sku: string;
+    cantidad: number;
+}
+
+export interface PedidoCreado {
+    id: number;
+    clienteId: number;
+    clienteNombre: string | null;
+    estado: string;
+    fecha: string;
+    total: number;
+    detalles: {
+        producto: string;
+        cantidad: number;
+        precioUnitario: number;
+        subtotal: number;
+    }[];
+}
 
 async function obtenerTokenCatalogo(
     instance: IPublicClientApplication,
@@ -268,4 +287,45 @@ export async function obtenerStockProducto(
     }
 
     return JSON.parse(body) as number;
+
+}
+
+/**
+ * Envía el carrito al BFF para realizar el checkout.
+ * El servidor consulta los precios y valida el stock.
+ */
+export async function realizarCheckout(
+    instance: IPublicClientApplication,
+    account: AccountInfo,
+    items: CheckoutItemRequest[],
+): Promise<PedidoCreado> {
+    const accessToken = await obtenerTokenCatalogo(instance, account);
+
+    const response = await fetch(
+        `${BFF_BASE_URL}/pedidos/checkout`,
+        {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ items }),
+        },
+    );
+
+    const body = await response.text();
+
+    if (!response.ok) {
+        throw new Error(
+            `No fue posible completar la compra. HTTP ${response.status}: ${body}`,
+        );
+    }
+
+    if (!body.trim()) {
+        throw new Error(
+            'El servidor confirmó una respuesta vacía. Verifica el estado del pedido antes de volver a intentarlo.',
+        );
+    }
+
+    return JSON.parse(body) as PedidoCreado;
 }
