@@ -5,7 +5,8 @@ IPublicClientApplication,
 
 import { obtenerToken } from '../token';
 
-const BFF_BASE_URL = 'http://localhost:8080/api'  //'https://tmbul2u2ic.execute-api.us-east-1.amazonaws.com/lanzar';
+//const BFF_BASE_URL = 'http://54.210.141.75:8080/api'  
+const BFF_BASE_URL = 'https://v9okws1wjb.execute-api.us-east-1.amazonaws.com/v1/api';
 
 export interface PedidoDetalle {
 producto: string;

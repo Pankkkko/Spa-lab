@@ -1,0 +1,19 @@
+services:
+  ms-catalogo:
+    build:
+      context: ./ms-pedidos360-catalog
+      dockerfile: Dockerfile
+    container_name: ms-pedidos360-catalog
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+
+      SPRING_DATA_REDIS_HOST: ${SPRING_DATA_REDIS_HOST}
+      SPRING_DATA_REDIS_PORT: ${SPRING_DATA_REDIS_PORT:-6379}
+      SPRING_DATA_REDIS_PASSWORD: ${SPRING_DATA_REDIS_PASSWORD:-}
+
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
+    restart: unless-stopped

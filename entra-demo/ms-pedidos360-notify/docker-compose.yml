@@ -1,0 +1,22 @@
+
+services:
+  ms-notify:
+    build:
+      context: ./ms-pedidos360-notify
+      dockerfile: Dockerfile
+    container_name: ms-pedidos360-notify
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_RABBITMQ_HOST: ${SPRING_RABBITMQ_HOST}
+      SPRING_RABBITMQ_PORT: ${SPRING_RABBITMQ_PORT:-5672}
+      SPRING_RABBITMQ_USERNAME: ${SPRING_RABBITMQ_USERNAME}
+      SPRING_RABBITMQ_PASSWORD: ${SPRING_RABBITMQ_PASSWORD}
+
+      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+
+      MS_CLIENTES_URL: ${MS_CLIENTES_URL}
+    restart: unless-stopped

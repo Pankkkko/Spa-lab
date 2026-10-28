@@ -1,3 +1,4 @@
+
 services:
   api-bff:
     build:
@@ -7,8 +8,10 @@ services:
     ports:
       - "8080:8080"
     environment:
-      ENTRA_ISSUER_URI: "https://login.microsoftonline.com/49551105-7651-4748-a01b-22b28daeb087/v2.0"
-      ENTRA_API_CLIENT_ID: "fa47563a-a68d-4d29-93c1-64bbfab52085"
-      MS_CLIENTES_URL: "http://10.0.3.142:8081"   # ← IP privada de ms-clientes
-      MS_PEDIDOS_URL: "http://10.0.2.157:8082"   # ← IP privada de ms-pedidos
+      ENTRA_ISSUER_URI: ${ENTRA_ISSUER_URI}
+      ENTRA_API_CLIENT_ID: ${ENTRA_API_CLIENT_ID}
+      MS_CLIENTES_URL: ${MS_CLIENTES_URL}
+      MS_PEDIDOS_URL: ${MS_PEDIDOS_URL}
+      MS_CATALOGO_URL: ${MS_CATALOGO_URL}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
     restart: unless-stopped

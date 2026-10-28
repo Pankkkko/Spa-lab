@@ -7,7 +7,7 @@ services:
     ports:
       - "8081:8081"
     environment:
-      SPRING_DATASOURCE_URL: "jdbc:mysql://p360-clientes.cubftnqdncaw.us-east-1.rds.amazonaws.com:3306/db_clientes?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
+      SPRING_DATASOURCE_URL: "jdbc:mysql://pedidos360-rds-clientes.cscmlmbq9sqs.us-east-1.rds.amazonaws.com:3306/db_clientes?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true"
       SPRING_DATASOURCE_USERNAME: "admin"
-      SPRING_DATASOURCE_PASSWORD: "Plutonio987"
+      SPRING_DATASOURCE_PASSWORD: "admin123"
     restart: unless-stopped

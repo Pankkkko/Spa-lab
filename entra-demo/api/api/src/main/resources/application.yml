@@ -1,3 +1,4 @@
+
 server:
   port: 8080
 
@@ -9,12 +10,14 @@ spring:
           issuer-uri: ${ENTRA_ISSUER_URI}
           audiences:
             - ${ENTRA_API_CLIENT_ID}
+
 microservices:
   clientes:
-    base-url: http://localhost:8081 #http://10.0.3.142:8081
+    base-url: ${MS_CLIENTES_URL:http://localhost:8081}
   pedidos:
-    base-url: http://localhost:8082 #http://10.0.2.157:8082
+    base-url: ${MS_PEDIDOS_URL:http://localhost:8082}
   catalogo:
-    base-url: http://localhost:8083 #http://IP_PRIVADA_CATALOGO:8083
+    base-url: ${MS_CATALOGO_URL:http://localhost:8083}
+
 internal:
-  api-key: "Pedidos360-local-8f4c9b7e2a6d"
+  api-key: ${INTERNAL_API_KEY}
