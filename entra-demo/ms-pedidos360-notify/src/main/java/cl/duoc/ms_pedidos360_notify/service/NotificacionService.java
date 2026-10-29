@@ -1,4 +1,3 @@
-
 package cl.duoc.ms_pedidos360_notify.service;
 
 import cl.duoc.ms_pedidos360_notify.dto.ClienteResponse;
@@ -106,8 +105,8 @@ public class NotificacionService {
             });
         }
 
-        NumberFormat formatoMoneda =
-                NumberFormat.getCurrencyInstance(
+        NumberFormat formatoMoneda
+                = NumberFormat.getCurrencyInstance(
                         Locale.forLanguageTag("es-CL")
                 );
 
@@ -117,8 +116,8 @@ public class NotificacionService {
         contenido.append("Hola ")
                 .append(
                         cliente.nombre() != null
-                                ? cliente.nombre()
-                                : "cliente"
+                        ? cliente.nombre()
+                        : "cliente"
                 )
                 .append(":\n\n");
 
@@ -215,8 +214,8 @@ public class NotificacionService {
                 detalles
         );
 
-        String nombreAdjunto =
-                "Factura_Demo_Pedido_" + pedidoId + ".pdf";
+        String nombreAdjunto
+                = "Factura_Demo_Pedido_" + pedidoId + ".pdf";
 
         // Un solo correo con el resumen y la factura adjunta.
         correoService.enviarCorreoConAdjunto(
@@ -244,7 +243,93 @@ public class NotificacionService {
                 evento.correlationId()
         );
 
-        // Se conserva el procesamiento actual de pedidos.
+        // Los comandos normales de creación siguen con su
+        // comportamiento actual, sin enviar correos adicionales.
+        if ("PedidoProcesar".equals(evento.type())) {
+            log.info(
+                    "Comando PedidoProcesar recibido correctamente. eventId: {}",
+                    evento.eventId()
+            );
+            return;
+        }
+
+        // Solo los eventos de actualización de estado
+        // activan el nuevo correo HTML.
+        if ("PedidoEstadoActualizado".equals(evento.type())) {
+
+            var payload = evento.payload();
+
+            long pedidoId = payload.path("pedidoId").asLong(-1);
+            long clienteId = payload.path("clienteId").asLong(-1);
+            String nuevoEstado = payload.path("estado").asText("");
+
+            if (pedidoId <= 0) {
+                throw new IllegalArgumentException(
+                        "El evento no contiene un pedidoId válido"
+                );
+            }
+
+            if (clienteId <= 0) {
+                throw new IllegalArgumentException(
+                        "El evento no contiene un clienteId válido"
+                );
+            }
+
+            if (nuevoEstado.isBlank()) {
+                throw new IllegalArgumentException(
+                        "El evento no contiene un estado válido"
+                );
+            }
+
+            log.info(
+                    "Cambio de estado detectado. pedidoId: {}, clienteId: {}, estado: {}",
+                    pedidoId,
+                    clienteId,
+                    nuevoEstado
+            );
+
+            // Consultar al microservicio Clientes para obtener
+            // el correo electrónico del propietario del pedido.
+            ClienteResponse cliente = restClient.get()
+                    .uri("/api/clientes/{id}", clienteId)
+                    .retrieve()
+                    .body(ClienteResponse.class);
+
+            if (cliente == null) {
+                throw new IllegalStateException(
+                        "El microservicio Clientes no devolvió información"
+                );
+            }
+
+            if (cliente.email() == null || cliente.email().isBlank()) {
+                throw new IllegalStateException(
+                        "El cliente no tiene un correo registrado"
+                );
+            }
+
+            // Enviar el nuevo correo HTML.
+            correoService.enviarCorreoCambioEstado(
+                    cliente.email(),
+                    pedidoId,
+                    nuevoEstado
+            );
+
+            log.info(
+                    "Correo de cambio de estado enviado correctamente. "
+                    + "pedidoId: {}, estado: {}, eventId: {}",
+                    pedidoId,
+                    nuevoEstado,
+                    evento.eventId()
+            );
+
+            return;
+        }
+
+        // Mantener el comportamiento anterior para otros tipos.
+        log.info(
+                "Comando de pedido sin procesamiento específico. Tipo: {}",
+                evento.type()
+        );
     }
 
     public void procesarFactura(ComandoEnvelope evento) {
