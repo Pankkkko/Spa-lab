@@ -63,6 +63,33 @@ const CATEGORIAS = [
     'Fusiles',
 ];
 
+// Transiciones permitidas por las reglas del microservicio de Pedidos.
+// CANCELADO solo es posible desde CREADO; los estados finales no avanzan.
+const TRANSICIONES_ESTADO: Record<EstadoPedido, readonly EstadoPedido[]> = {
+    CREADO: ['ACEPTADO', 'CANCELADO'],
+    ACEPTADO: ['EN_PREPARACION'],
+    EN_PREPARACION: ['DESPACHADO'],
+    DESPACHADO: ['ENTREGADO'],
+    ENTREGADO: [],
+    CANCELADO: [],
+};
+
+function esEstadoPedido(estado: string): estado is EstadoPedido {
+    return ESTADOS_PEDIDO.some((estadoValido) => estadoValido === estado);
+}
+
+function estadosDisponibles(estadoActual: string): EstadoPedido[] {
+    if (!esEstadoPedido(estadoActual)) {
+        return [];
+    }
+
+    const permitidos = TRANSICIONES_ESTADO[estadoActual];
+    // Mantener el estado actual visible en el selector controlado.
+    return ESTADOS_PEDIDO.filter(
+        (estado) => estado === estadoActual || permitidos.includes(estado),
+    );
+}
+
 function AdminPage({ onLogout }: AdminPageProps) {
     const { instance, accounts } = useMsal();
 
@@ -155,6 +182,8 @@ function AdminPage({ onLogout }: AdminPageProps) {
     }
 
     useEffect(() => {
+        // La función gestiona la carga, los errores y los resultados de la solicitud.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         void cargarDatos();
         // La carga inicial depende de la instancia MSAL y sus cuentas.
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -175,6 +204,37 @@ function AdminPage({ onLogout }: AdminPageProps) {
         pedidoId: number,
         estado: EstadoPedido,
     ) {
+        const pedidoActual = pedidos.find((pedido) => pedido.id === pedidoId);
+
+        if (!pedidoActual) {
+            setError(`No se encontró el pedido #${pedidoId}.`);
+            return;
+        }
+
+        if (!esEstadoPedido(pedidoActual.estado)) {
+            setMensaje('');
+            setError(
+                `El pedido #${pedidoId} tiene un estado no reconocido: ${pedidoActual.estado}.`,
+            );
+            return;
+        }
+
+        if (pedidoActual.estado === estado) {
+            return;
+        }
+
+        if (!TRANSICIONES_ESTADO[pedidoActual.estado]?.includes(estado)) {
+            setMensaje('');
+            setError(
+                `No se permite cambiar el pedido #${pedidoId} de ${pedidoActual.estado} a ${estado}.`,
+            );
+            return;
+        }
+
+        if (pedidoEnActualizacion !== null) {
+            return;
+        }
+
         const account = instance.getActiveAccount() ?? accounts[0];
 
         if (!account) {
@@ -810,17 +870,26 @@ function AdminPage({ onLogout }: AdminPageProps) {
                                                     className={`admin-order-status status-${pedido.estado.toLowerCase()}`}
                                                     value={pedido.estado}
                                                     disabled={
-                                                        pedidoEnActualizacion ===
-                                                        pedido.id
+                                                        pedidoEnActualizacion !== null ||
+                                                        estadosDisponibles(pedido.estado).length <= 1
                                                     }
-                                                    onChange={(event) =>
-                                                        void actualizarEstado(
-                                                            pedido.id,
-                                                            event.target.value as EstadoPedido,
-                                                        )
-                                                    }
+                                                    onChange={(event) => {
+                                                        const nuevoEstado =
+                                                            ESTADOS_PEDIDO.find(
+                                                                (estado) =>
+                                                                    estado ===
+                                                                    event.currentTarget.value,
+                                                            );
+
+                                                        if (nuevoEstado) {
+                                                            void actualizarEstado(
+                                                                pedido.id,
+                                                                nuevoEstado,
+                                                            );
+                                                        }
+                                                    }}
                                                 >
-                                                    {ESTADOS_PEDIDO.map((estado) => (
+                                                    {estadosDisponibles(pedido.estado).map((estado) => (
                                                         <option
                                                             key={estado}
                                                             value={estado}

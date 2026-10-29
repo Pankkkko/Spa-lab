@@ -5,8 +5,8 @@ import type {
 
 import { obtenerToken } from '../token';
 
-//const BFF_BASE_URL = 'http://54.210.141.75:8080/api' 
-const BFF_BASE_URL = 'https://v9okws1wjb.execute-api.us-east-1.amazonaws.com/v1/api';
+const BFF_BASE_URL = 'http://54.80.126.170:8080/api' 
+//const BFF_BASE_URL = 'https://v9okws1wjb.execute-api.us-east-1.amazonaws.com/v1/api';
 
 export interface Cliente {
     id: number;
