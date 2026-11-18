@@ -19,3 +19,17 @@ spring:
       retries: 10
       properties:
         enable.idempotence: true
+        "[spring.json.add.type.headers]": false
+    consumer:
+      group-id: reportes
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JacksonJsonDeserializer
+      properties:
+        "[spring.json.value.default.type]": cl.duoc.ms_pedidos360_report.dto.PedidoKafkaEvent
+        "[spring.json.trusted.packages]": cl.duoc.ms_pedidos360_report.dto
+        "[spring.json.use.type.headers]": false
+
+    listener:
+      ack-mode: record
