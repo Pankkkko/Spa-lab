@@ -18,7 +18,7 @@ public class PedidoKafkaProducer {
 
     private final KafkaTemplate<String, PedidoKafkaEvent> kafkaTemplate;
 
-    @Value("${app.kafka.topics.orders}")
+    @Value("${spring.kafka.topics.orders}")
     private String ordersTopic;
 
     public PedidoKafkaProducer(

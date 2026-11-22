@@ -1,3 +1,56 @@
+
+server:
+  port: 8086
+
 spring:
   application:
     name: ms-pedidos360-audit
+
+  datasource:
+    url: ${AUDIT_DB_URL:jdbc:mysql://localhost:3306/pedidos360_audit?useSSL=false&serverTimezone=UTC}
+    username: ${AUDIT_DB_USERNAME:root}
+    password: ${AUDIT_DB_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+      acks: all
+      retries: 10
+      properties:
+        enable.idempotence: true
+        "[spring.json.add.type.headers]": false
+
+    consumer:
+      group-id: auditoria
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        "[spring.json.value.default.type]": cl.duoc.ms_pedidos360_audit.dto.PedidoKafkaEvent
+        "[spring.json.trusted.packages]": cl.duoc.ms_pedidos360_audit.dto
+        "[spring.json.use.type.headers]": false
+        "[spring.deserializer.key.delegate.class]": org.apache.kafka.common.serialization.StringDeserializer
+        "[spring.deserializer.value.delegate.class]": org.springframework.kafka.support.serializer.JacksonJsonDeserializer
+
+    listener:
+      ack-mode: record
+
+app:
+  kafka:
+    topics:
+      orders: orders.events
+      audit: audit.timeline
+      dlt: orders.events.auditoria.DLT
