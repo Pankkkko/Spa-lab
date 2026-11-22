@@ -1,14 +1,13 @@
 package cl.duoc.ms_pedidos360_report.messaging;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.stereotype.Component;
+
 import cl.duoc.ms_pedidos360_report.config.RabbitMQReportConfig;
 import cl.duoc.ms_pedidos360_report.dto.ComandoEnvelope;
 import cl.duoc.ms_pedidos360_report.dto.PedidoKafkaEvent;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.stereotype.Component;
 
 @Component
 public class PedidoRabbitConsumer {
@@ -28,12 +27,18 @@ public class PedidoRabbitConsumer {
     public void recibirCambioEstado(ComandoEnvelope evento) {
 
         if (!esEventoValido(evento)) {
-            log.warn("Evento RabbitMQ rechazado por validación");
-            return;
+
+            log.error(
+                    "Mensaje RabbitMQ inválido. Se enviará a recuperación."
+            );
+
+            throw new IllegalArgumentException(
+                    "Evento RabbitMQ inválido"
+            );
         }
 
         log.info(
-                "Evento recibido desde RabbitMQ | EventId: {} | Type: {}",
+                "Evento recibido desde RabbitMQ | EventId: {} | Tipo: {}",
                 evento.eventId(),
                 evento.type()
         );
@@ -47,6 +52,7 @@ public class PedidoRabbitConsumer {
                 evento.payload()
         );
 
+        // Esperamos confirmación del envío a Kafka.
         kafkaProducer.publicar(eventoKafka).join();
 
         log.info(

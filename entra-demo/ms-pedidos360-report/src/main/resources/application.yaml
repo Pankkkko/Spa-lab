@@ -4,7 +4,7 @@ spring:
   application:
     name: ms-pedidos360-report
   datasource:
-    url: ${REPORT_DB_URL:jdbc:mysql://localhost:3306/pedidos360_report?useSSL=false&serverTimezone=UTC}
+    url: ${REPORT_DB_URL:jdbc:mysql://localhost:3306/db_report?useSSL=false&serverTimezone=UTC}
     username: ${REPORT_DB_USERNAME:root}
     password: ${REPORT_DB_PASSWORD:}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -22,6 +22,15 @@ spring:
     username: ${RABBITMQ_USERNAME}
     password: ${RABBITMQ_PASSWORD}
     virtual-host: /
+    listener:
+    simple:
+      retry:
+        enabled: true
+        initial-interval: 1000
+        max-attempts: 3
+        multiplier: 2.0
+        max-interval: 10000
+      default-requeue-rejected: false
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     topics:
@@ -39,12 +48,14 @@ spring:
       group-id: reportes
       auto-offset-reset: earliest
       enable-auto-commit: false
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JacksonJsonDeserializer
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
       properties:
         "[spring.json.value.default.type]": cl.duoc.ms_pedidos360_report.dto.PedidoKafkaEvent
         "[spring.json.trusted.packages]": cl.duoc.ms_pedidos360_report.dto
         "[spring.json.use.type.headers]": false
+        "[spring.deserializer.key.delegate.class]": org.apache.kafka.common.serialization.StringDeserializer
+        "[spring.deserializer.value.delegate.class]": org.springframework.kafka.support.serializer.JacksonJsonDeserializer
 
     listener:
       ack-mode: record

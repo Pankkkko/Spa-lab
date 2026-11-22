@@ -1,15 +1,14 @@
 package cl.duoc.ms_pedidos360_report.messaging;
 
-import cl.duoc.ms_pedidos360_report.dto.PedidoKafkaEvent;
+import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.CompletableFuture;
+import cl.duoc.ms_pedidos360_report.dto.PedidoKafkaEvent;
 
 @Service
 public class PedidoKafkaProducer {
@@ -29,18 +28,22 @@ public class PedidoKafkaProducer {
 
     public CompletableFuture<Void> publicar(PedidoKafkaEvent evento) {
 
+        String kafkaKey = evento.payload()
+                .path("pedidoId")
+                .asText(evento.eventId());
+
         return kafkaTemplate.send(
                 ordersTopic,
-                evento.eventId(),
+                kafkaKey,
                 evento
         ).thenAccept(resultado -> {
 
             log.info(
-                    "Evento publicado en Kafka | Topic: {} | Partition: {} | Offset: {} | EventId: {}",
+                    "Evento publicado | Topic: {} | Partition: {} | Offset: {} | Pedido: {}",
                     resultado.getRecordMetadata().topic(),
                     resultado.getRecordMetadata().partition(),
                     resultado.getRecordMetadata().offset(),
-                    evento.eventId()
+                    kafkaKey
             );
 
         }).exceptionally(error -> {

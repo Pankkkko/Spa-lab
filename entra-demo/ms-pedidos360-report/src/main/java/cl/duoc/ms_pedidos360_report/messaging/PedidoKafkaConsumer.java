@@ -1,13 +1,12 @@
 package cl.duoc.ms_pedidos360_report.messaging;
 
-import cl.duoc.ms_pedidos360_report.dto.PedidoKafkaEvent;
-import cl.duoc.ms_pedidos360_report.service.PedidoEventProcessor;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
+
+import cl.duoc.ms_pedidos360_report.dto.PedidoKafkaEvent;
+import cl.duoc.ms_pedidos360_report.service.PedidoEventProcessor;
 
 @Component
 public class PedidoKafkaConsumer {
@@ -28,8 +27,12 @@ public class PedidoKafkaConsumer {
     public void consumir(PedidoKafkaEvent evento) {
 
         if (!esEventoValido(evento)) {
-            log.warn("Evento Kafka rechazado: contenido inválido");
-            return;
+
+            log.error("Evento Kafka inválido");
+
+            throw new IllegalArgumentException(
+                    "El evento recibido no cumple la estructura esperada"
+            );
         }
 
         log.info(
