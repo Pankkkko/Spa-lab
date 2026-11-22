@@ -218,6 +218,20 @@ public class SecurityConfig {
                         )
                         .hasRole("Admin")
                         // =================================================
+                        // REPORT
+                        // Solo Admin puede consultar estadísticas
+                        // =================================================
+
+                        .requestMatchers("/api/report/**")
+                        .hasRole("Admin")
+                        // =================================================
+                        // AUDIT
+                        // Solo Admin puede consultar registros de auditoría
+                        // =================================================
+
+                        .requestMatchers("/api/audit/**")
+                        .hasRole("Admin")
+                        // =================================================
                         // TODO LO DEMÁS
                         // =================================================
 

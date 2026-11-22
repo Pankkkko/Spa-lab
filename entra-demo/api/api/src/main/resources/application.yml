@@ -18,6 +18,10 @@ microservices:
     base-url: ${MS_PEDIDOS_URL:http://localhost:8082}
   catalogo:
     base-url: ${MS_CATALOGO_URL:http://localhost:8083}
+  report:
+    base-url: ${MS_REPORT_URL:http://localhost:8085}
+  audit:
+    base-url: ${MS_AUDIT_URL:http://localhost:8086}
 
 internal:
   api-key: ${INTERNAL_API_KEY}
