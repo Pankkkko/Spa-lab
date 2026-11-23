@@ -17,20 +17,20 @@ spring:
       hibernate:
         format_sql: true
   rabbitmq:
-    host: ${RABBITMQ_HOST}
+    host: ${RABBITMQ_HOST:localhost}
     port: 5672
-    username: ${RABBITMQ_USERNAME}
-    password: ${RABBITMQ_PASSWORD}
+    username: ${RABBITMQ_USERNAME:admin}
+    password: ${RABBITMQ_PASSWORD:admin123}
     virtual-host: /
     listener:
-    simple:
-      retry:
-        enabled: true
-        initial-interval: 1000
-        max-attempts: 3
-        multiplier: 2.0
-        max-interval: 10000
-      default-requeue-rejected: false
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 1000
+          max-attempts: 3
+          multiplier: 2.0
+          max-interval: 10000
+        default-requeue-rejected: false
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     topics:

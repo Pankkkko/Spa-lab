@@ -21,7 +21,7 @@ public class PedidoKafkaConsumer {
     }
 
     @KafkaListener(
-            topics = "${app.kafka.topics.orders}",
+            topics = "${spring.kafka.topics.orders}",
             groupId = "${spring.kafka.consumer.group-id}"
     )
     public void consumir(PedidoKafkaEvent evento) {

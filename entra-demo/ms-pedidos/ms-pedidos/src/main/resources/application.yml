@@ -28,4 +28,4 @@ spring:
     password: ${SPRING_RABBITMQ_PASSWORD:admin123}
 
 internal:
-  api-key: ${INTERNAL_API_KEY}
+  api-key: ${INTERNAL_API_KEY:Pedidos360-local-8f4c9b7e2a6d}
