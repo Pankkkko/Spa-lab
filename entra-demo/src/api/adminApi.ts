@@ -23,16 +23,6 @@ export interface PedidoDetalle {
     subtotal: number;
 }
 
-export interface Pedido {
-    id: number;
-    clienteId: number;
-    clienteNombre: string;
-    estado: string;
-    fecha: string;
-    total: number;
-    detalles: PedidoDetalle[];
-}
-
 export const ESTADOS_PEDIDO = [
     'CREADO',
     'ACEPTADO',
@@ -43,6 +33,16 @@ export const ESTADOS_PEDIDO = [
 ] as const;
 
 export type EstadoPedido = (typeof ESTADOS_PEDIDO)[number];
+
+export interface Pedido {
+    id: number;
+    clienteId: number;
+    clienteNombre: string;
+    estado: EstadoPedido;
+    fecha: string;
+    total: number;
+    detalles: PedidoDetalle[];
+}
 
 export async function obtenerClientes(
     instance: IPublicClientApplication,
