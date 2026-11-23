@@ -1,4 +1,3 @@
-
 package cl.duoc.ms_pedidos360_audit.service;
 
 import java.time.Instant;
@@ -101,12 +100,15 @@ public class AuditService {
         return valor == null || valor.isBlank() ? null : valor.trim();
     }
 
-    private AuditRegistroResponse convertirAResponse(RegistroAuditoria registro) {
+    private AuditRegistroResponse convertirAResponse(
+            RegistroAuditoria registro
+    ) {
         return new AuditRegistroResponse(
             registro.getId(),
             registro.getEventId(),
             registro.getUsuarioId(),
             registro.getUsuarioNombre(),
+            registro.getClienteId(),
             registro.getTipoEvento(),
             registro.getEntidad(),
             registro.getEntidadId(),
@@ -119,28 +121,29 @@ public class AuditService {
     }
 
     @Transactional(readOnly = true)
-public AuditRegistroDetalleResponse buscarPorId(Long id) {
+    public AuditRegistroDetalleResponse buscarPorId(Long id) {
 
-    RegistroAuditoria registro = auditoriaRepository.findById(id)
-        .orElseThrow(() -> new java.util.NoSuchElementException(
-            "No se encontró un registro de auditoría con ID: " + id
-        ));
+        RegistroAuditoria registro = auditoriaRepository.findById(id)
+            .orElseThrow(() -> new java.util.NoSuchElementException(
+                "No se encontró un registro de auditoría con ID: " + id
+            ));
 
-    return new AuditRegistroDetalleResponse(
-        registro.getId(),
-        registro.getEventId(),
-        registro.getUsuarioId(),
-        registro.getUsuarioNombre(),
-        registro.getTipoEvento(),
-        registro.getEntidad(),
-        registro.getEntidadId(),
-        registro.getDescripcion(),
-        registro.getFechaEvento(),
-        registro.getOrigen(),
-        registro.getTraceId(),
-        registro.getCorrelationId(),
-        registro.getPayload(),
-        registro.getFechaRecepcion()
-    );
-}
+        return new AuditRegistroDetalleResponse(
+            registro.getId(),
+            registro.getEventId(),
+            registro.getUsuarioId(),
+            registro.getUsuarioNombre(),
+            registro.getClienteId(),
+            registro.getTipoEvento(),
+            registro.getEntidad(),
+            registro.getEntidadId(),
+            registro.getDescripcion(),
+            registro.getFechaEvento(),
+            registro.getOrigen(),
+            registro.getTraceId(),
+            registro.getCorrelationId(),
+            registro.getPayload(),
+            registro.getFechaRecepcion()
+        );
+    }
 }

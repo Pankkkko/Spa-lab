@@ -71,7 +71,10 @@ public class AuditEventProcessor {
 
         String pedidoId = pedidoNodo.asText();
 
-        // 3. Obtener y normalizar el estado.
+        // 3. Obtener el identificador del cliente.
+        Long clienteId = obtenerLong(payload, "clienteId");
+
+        // 4. Obtener y normalizar el estado.
         String estado = obtenerTexto(payload, "estado");
 
         if (estado == null) {
@@ -95,7 +98,7 @@ public class AuditEventProcessor {
         Instant fechaEvento = evento.timestamp();
         Instant fechaRecepcion = Instant.now();
 
-        // 4. Obtener información adicional.
+        // 5. Obtener información adicional.
         String descripcion = "El pedido #"
                 + pedidoId
                 + " cambió al estado "
@@ -106,12 +109,13 @@ public class AuditEventProcessor {
         String usuarioNombre = null;
         String origen = null;
 
-        // 5. Crear registro de auditoría.
+        // 6. Crear registro de auditoría.
         RegistroAuditoria registro = new RegistroAuditoria();
 
         registro.setEventId(evento.eventId());
         registro.setUsuarioId(usuarioId);
         registro.setUsuarioNombre(usuarioNombre);
+        registro.setClienteId(clienteId);
         registro.setTipoEvento(tipoEvento);
         registro.setEntidad("PEDIDO");
         registro.setEntidadId(pedidoId);
@@ -123,10 +127,10 @@ public class AuditEventProcessor {
         registro.setPayload(payload.toString());
         registro.setFechaRecepcion(fechaRecepcion);
 
-        // 6. Persistir el registro.
+        // 7. Persistir el registro.
         auditoriaRepository.saveAndFlush(registro);
 
-        // 7. Construir el evento normalizado.
+        // 8. Construir el evento normalizado.
         AuditTimelineEvent eventoAuditoria = new AuditTimelineEvent(
                 evento.eventId(),
                 usuarioId,
@@ -142,12 +146,13 @@ public class AuditEventProcessor {
                 payload.toString()
         );
 
-        // 8. Publicar en audit.timeline.
+        // 9. Publicar en audit.timeline.
         kafkaProducer.publicar(eventoAuditoria).join();
 
         log.info(
-                "Evento auditado correctamente | Pedido: {} | Tipo: {}",
+                "Evento auditado correctamente | Pedido: {} | Cliente: {} | Tipo: {}",
                 pedidoId,
+                clienteId,
                 tipoEvento
         );
     }
@@ -163,5 +168,29 @@ public class AuditEventProcessor {
         String texto = valor.asText();
 
         return texto.isBlank() ? null : texto;
+    }
+
+    private Long obtenerLong(JsonNode nodo, String campo) {
+
+        JsonNode valor = nodo.path(campo);
+
+        if (valor.isMissingNode() || valor.isNull()) {
+            return null;
+        }
+
+        String texto = valor.asText();
+
+        if (texto == null || texto.isBlank()) {
+            return null;
+        }
+
+        try {
+            return Long.valueOf(texto);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(
+                    "El campo " + campo + " no contiene un identificador válido: " + texto,
+                    e
+            );
+        }
     }
 }

@@ -31,6 +31,10 @@ import lombok.Setter;
             columnList = "usuario_id"
         ),
         @Index(
+            name = "idx_auditoria_cliente",
+            columnList = "cliente_id"
+        ),
+        @Index(
             name = "idx_auditoria_fecha",
             columnList = "fecha_evento"
         ),
@@ -62,6 +66,9 @@ public class RegistroAuditoria {
 
     @Column(name = "usuario_nombre", length = 150)
     private String usuarioNombre;
+
+    @Column(name = "cliente_id")
+    private Long clienteId;
 
     @Column(name = "tipo_evento", nullable = false, length = 100)
     private String tipoEvento;

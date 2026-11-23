@@ -1,4 +1,3 @@
-
 package cl.duoc.ms_pedidos360_audit.dto;
 
 import java.time.Instant;
@@ -8,6 +7,7 @@ public record AuditRegistroResponse(
     String eventId,
     String usuarioId,
     String usuarioNombre,
+    Long clienteId,
     String tipoEvento,
     String entidad,
     String entidadId,

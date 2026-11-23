@@ -19,6 +19,7 @@ export interface AuditRegistroResponse {
     eventId: string;
     usuarioId: string | null;
     usuarioNombre: string | null;
+    clienteId: number | null;
     tipoEvento: string;
     entidad: string;
     entidadId: string;
@@ -29,8 +30,7 @@ export interface AuditRegistroResponse {
     correlationId: string | null;
 }
 
-export interface AuditRegistroDetalleResponse
-    extends AuditRegistroResponse {
+export interface AuditRegistroDetalleResponse extends AuditRegistroResponse {
     payload: string | null;
     fechaRecepcion: string;
 }

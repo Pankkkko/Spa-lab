@@ -11,6 +11,14 @@ import type {
     AuditRegistroResponse,
 } from '../../api/auditApi';
 
+import {
+    obtenerClientes,
+} from '../../api/adminApi';
+
+import type {
+    Cliente,
+} from '../../api/adminApi';
+
 import '../../styles/admin.css';
 
 const TAMANO_PAGINA = 10;
@@ -36,8 +44,10 @@ function AdminAuditoria() {
     const { instance, accounts } = useMsal();
 
     const [registros, setRegistros] = useState<AuditRegistroResponse[]>([]);
+    const [clientes, setClientes] = useState<Cliente[]>([]);
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState('');
+    const [errorClientes, setErrorClientes] = useState('');
 
     const [paginaActual, setPaginaActual] = useState(0);
     const [totalPaginas, setTotalPaginas] = useState(0);
@@ -52,6 +62,48 @@ function AdminAuditoria() {
 
     const [cargandoDetalle, setCargandoDetalle] = useState(false);
     const [errorDetalle, setErrorDetalle] = useState('');
+
+    // Cargar clientes para resolver el nombre asociado a cada clienteId.
+    const cargarClientes = useCallback(async () => {
+        const account = instance.getActiveAccount() ?? accounts[0];
+
+        if (!account) {
+            setErrorClientes('No se encontró una cuenta activa.');
+            return;
+        }
+
+        setErrorClientes('');
+
+        try {
+            const resultado = await obtenerClientes(instance, account);
+            setClientes(resultado);
+        } catch (err) {
+            console.error('Error al cargar los clientes:', err);
+
+            setErrorClientes(
+                err instanceof Error
+                    ? err.message
+                    : 'No se pudieron cargar los clientes.',
+            );
+        }
+    }, [instance, accounts]);
+
+    // Resolver nombre del cliente mediante su ID.
+    function obtenerNombreCliente(clienteId: number | null): string {
+        if (clienteId === null || clienteId === undefined) {
+            return 'No asociado';
+        }
+
+        const cliente = clientes.find(
+            (item) => item.id === clienteId,
+        );
+
+        return cliente?.nombre ?? 'Cliente no encontrado';
+    }
+
+    useEffect(() => {
+        void cargarClientes();
+    }, [cargarClientes]);
 
     const cargarRegistros = useCallback(async () => {
         const account = instance.getActiveAccount() ?? accounts[0];
@@ -146,9 +198,14 @@ function AdminAuditoria() {
             return true;
         }
 
+        const nombreCliente = obtenerNombreCliente(registro.clienteId);
+
         return [
             registro.eventId,
             registro.usuarioNombre,
+            registro.usuarioId,
+            registro.clienteId,
+            nombreCliente,
             registro.tipoEvento,
             registro.entidad,
             registro.entidadId,
@@ -200,7 +257,10 @@ function AdminAuditoria() {
                 <button
                     className="admin-secondary-button"
                     type="button"
-                    onClick={() => void cargarRegistros()}
+                    onClick={() => {
+                        void cargarRegistros();
+                        void cargarClientes();
+                    }}
                 >
                     Actualizar registros
                 </button>
@@ -237,11 +297,18 @@ function AdminAuditoria() {
                 <input
                     id="buscar-auditoria"
                     type="search"
-                    placeholder="Evento, usuario, entidad, pedido, traceId..."
+                    placeholder="Evento, cliente, usuario, pedido, traceId..."
                     value={busqueda}
                     onChange={(event) => setBusqueda(event.target.value)}
                 />
             </div>
+
+            {errorClientes && (
+                <p className="empty-message">
+                    No fue posible cargar los nombres de los clientes.
+                    Se mostrarán sus identificadores cuando estén disponibles.
+                </p>
+            )}
 
             {/* Tabla de eventos */}
             {registrosFiltrados.length === 0 ? (
@@ -257,6 +324,7 @@ function AdminAuditoria() {
                             <tr>
                                 <th>Fecha</th>
                                 <th>Evento</th>
+                                <th>Cliente del pedido</th>
                                 <th>Usuario</th>
                                 <th>Entidad</th>
                                 <th>ID entidad</th>
@@ -277,8 +345,26 @@ function AdminAuditoria() {
                                     </td>
 
                                     <td>
+                                        {registro.clienteId !== null ? (
+                                            <>
+                                                <strong>
+                                                    {obtenerNombreCliente(
+                                                        registro.clienteId,
+                                                    )}
+                                                </strong>
+                                                <br />
+                                                <small>
+                                                    ID: {registro.clienteId}
+                                                </small>
+                                            </>
+                                        ) : (
+                                            'No asociado'
+                                        )}
+                                    </td>
+
+                                    <td>
                                         {registro.usuarioNombre ??
-                                            'No identificado'}
+                                            'Administrador del sistema'}
                                     </td>
 
                                     <td>{registro.entidad}</td>
@@ -433,13 +519,43 @@ function AdminAuditoria() {
                                     </label>
 
                                     <label>
-                                        Usuario
+                                        Cliente del pedido
+                                        <input
+                                            readOnly
+                                            value={obtenerNombreCliente(
+                                                detalle.clienteId,
+                                            )}
+                                        />
+                                    </label>
+
+                                    <label>
+                                        Cliente ID
+                                        <input
+                                            readOnly
+                                            value={
+                                                detalle.clienteId !== null
+                                                    ? String(detalle.clienteId)
+                                                    : 'No asociado'
+                                            }
+                                        />
+                                    </label>
+
+                                    <label>
+                                        Usuario que ejecutó la acción
                                         <input
                                             readOnly
                                             value={
                                                 detalle.usuarioNombre ??
-                                                'No identificado'
+                                                'Administrador del sistema'
                                             }
+                                        />
+                                    </label>
+
+                                    <label>
+                                        Usuario ID
+                                        <input
+                                            readOnly
+                                            value={detalle.usuarioId ?? '-'}
                                         />
                                     </label>
 

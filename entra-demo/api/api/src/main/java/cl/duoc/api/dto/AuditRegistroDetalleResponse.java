@@ -1,4 +1,3 @@
-
 package cl.duoc.api.dto;
 
 import java.time.Instant;
@@ -8,6 +7,7 @@ public record AuditRegistroDetalleResponse(
     String eventId,
     String usuarioId,
     String usuarioNombre,
+    Long clienteId,
     String tipoEvento,
     String entidad,
     String entidadId,
