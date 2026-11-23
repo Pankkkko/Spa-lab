@@ -1,0 +1,182 @@
+
+/* =========================
+   NAVBAR ADMINISTRATIVA
+========================= */
+
+.admin-navbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+
+    padding: 14px 5%;
+
+    background: #ffffff;
+    border-bottom: 1px solid #dceceb;
+    box-shadow: 0 3px 12px rgba(12, 59, 69, 0.06);
+}
+
+.admin-navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    flex-shrink: 0;
+
+    color: #0c3b45;
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.admin-navbar-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+
+    border-radius: 12px;
+
+    background: #20666b;
+    color: #ffffff;
+
+    font-size: 0.85rem;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+
+    box-shadow: 0 4px 10px rgba(12, 59, 69, 0.15);
+}
+
+.admin-navbar-brand small {
+    padding: 4px 7px;
+
+    border-radius: 5px;
+
+    background: #cff0ea;
+    color: #20666b;
+
+    font-size: 0.65rem;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+}
+
+.admin-navbar-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+
+    min-width: 0;
+}
+
+.admin-navbar-actions button {
+    flex-shrink: 0;
+
+    padding: 10px 13px;
+
+    border: 1px solid #c7dfdc;
+    border-radius: 10px;
+
+    background: #ffffff;
+    color: #20666b;
+
+    font-family: inherit;
+    font-size: 0.84rem;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s,
+        color 0.2s,
+        border-color 0.2s,
+        transform 0.2s;
+}
+
+.admin-navbar-actions button:hover {
+    transform: translateY(-1px);
+
+    border-color: #20666b;
+    background: #cff0ea;
+}
+
+.admin-navbar-actions button:focus-visible {
+    outline: 3px solid rgba(62, 155, 148, 0.4);
+    outline-offset: 3px;
+}
+
+.admin-navbar-actions .admin-navbar-link-active {
+    border-color: #20666b;
+    background: #20666b;
+    color: #ffffff;
+}
+
+.admin-navbar-actions .admin-navbar-link-active:hover {
+    background: #0c3b45;
+    color: #ffffff;
+}
+
+.admin-navbar-actions .admin-navbar-logout {
+    margin-left: 5px;
+
+    border-color: #20666b;
+    background: #20666b;
+    color: #ffffff;
+}
+
+.admin-navbar-actions .admin-navbar-logout:hover {
+    border-color: #0c3b45;
+    background: #0c3b45;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 1050px) {
+    .admin-navbar {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .admin-navbar-actions {
+        width: 100%;
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 5px;
+    }
+}
+
+@media (max-width: 550px) {
+    .admin-navbar {
+        padding: 12px 5%;
+    }
+
+    .admin-navbar-brand {
+        gap: 8px;
+        font-size: 1rem;
+    }
+
+    .admin-navbar-logo {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+    }
+
+    .admin-navbar-actions {
+        gap: 6px;
+    }
+
+    .admin-navbar-actions button {
+        padding: 9px 11px;
+        font-size: 0.78rem;
+    }
+}

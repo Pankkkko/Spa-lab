@@ -10,7 +10,7 @@ spring:
     host: ${SPRING_RABBITMQ_HOST:localhost}
     port: ${SPRING_RABBITMQ_PORT:5672}
     username: ${SPRING_RABBITMQ_USERNAME:admin}
-    password: ${SPRING_RABBITMQ_PASSWORD:}
+    password: ${SPRING_RABBITMQ_PASSWORD:admin123}
     listener:
       simple:
         acknowledge-mode: manual
@@ -19,8 +19,8 @@ spring:
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
+    username: ${MAIL_USERNAME:germanx9514@gmail.com}
+    password: ${MAIL_PASSWORD:zsflavljskxbzzva}
     properties:
       mail:
         smtp:

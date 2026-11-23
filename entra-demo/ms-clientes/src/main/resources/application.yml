@@ -5,9 +5,12 @@ spring:
   application:
     name: ms-clientes
   datasource:
-    url: jdbc:mysql://pedidos360-rds-clientes.cscmlmbq9sqs.us-east-1.rds.amazonaws.com:3306/db_clientes?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true 
-    username: admin
-    password: admin123
+    url: jdbc:mysql://localhost:3306/db_clientes?serverTimezone=UTC&characterEncoding=UTF-8
+    #url: jdbc:mysql://pedidos360-rds-clientes.cscmlmbq9sqs.us-east-1.rds.amazonaws.com:3306/db_clientes?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true 
+    #username: admin
+    username: root
+    #password: admin123
+    password: 
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:

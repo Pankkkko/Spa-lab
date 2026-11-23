@@ -1,6 +1,9 @@
 
 import { useEffect, useState } from 'react';
 import { useMsal } from '@azure/msal-react';
+import AdminNavbar, {
+    type AdminSection,
+} from '../components/AdminNavbar';
 
 import {
     cambiarEstadoPedido,
@@ -27,6 +30,7 @@ import type {
 } from '../api/catalogoApi';
 
 import '../styles/admin.css';
+import '../styles/admin-navbar.css';
 
 interface AdminPageProps {
     onLogout: () => void;
@@ -92,6 +96,9 @@ function estadosDisponibles(estadoActual: string): EstadoPedido[] {
 
 function AdminPage({ onLogout }: AdminPageProps) {
     const { instance, accounts } = useMsal();
+
+    const [seccionActual, setSeccionActual] =
+        useState<AdminSection>('principal');
 
     const [clientes, setClientes] = useState<Cliente[]>([]);
     const [pedidos, setPedidos] = useState<Pedido[]>([]);
@@ -415,21 +422,20 @@ function AdminPage({ onLogout }: AdminPageProps) {
     });
 
     return (
-        <main className="admin-page">
+        <>
+            <AdminNavbar
+                paginaActual={seccionActual}
+                onCambiarPagina={setSeccionActual}
+                onLogout={onLogout}
+            />
+
+            <main className="admin-page">
             <header className="admin-header">
                 <div>
                     <span className="admin-label">PEDIDOS360</span>
                     <h1>Panel de Administración</h1>
                     <p>Gestión de clientes, productos y pedidos.</p>
                 </div>
-
-                <button
-                    className="admin-logout-button"
-                    onClick={onLogout}
-                    type="button"
-                >
-                    Cerrar sesión
-                </button>
             </header>
 
             {cargando && (
@@ -467,7 +473,8 @@ function AdminPage({ onLogout }: AdminPageProps) {
 
             {!cargando && !error && (
                 <>
-                    <section className="admin-summary">
+                    {seccionActual === 'principal' && (
+                        <section className="admin-summary">
                         <article className="summary-card">
                             <span>Clientes</span>
                             <strong>{clientes.length}</strong>
@@ -494,8 +501,10 @@ function AdminPage({ onLogout }: AdminPageProps) {
                                 }
                             </strong>
                         </article>
-                    </section>
+                        </section>
+                    )}
 
+                    {seccionActual === 'productos' && (
                     <section className="admin-section">
                         <div className="section-heading admin-product-heading">
                             <div>
@@ -780,7 +789,9 @@ function AdminPage({ onLogout }: AdminPageProps) {
                             </div>
                         )}
                     </section>
+                    )}
 
+                    {seccionActual === 'clientes' && (
                     <section className="admin-section">
                         <div className="section-heading">
                             <div>
@@ -827,7 +838,9 @@ function AdminPage({ onLogout }: AdminPageProps) {
                             </div>
                         )}
                     </section>
+                    )}
 
+                    {seccionActual === 'pedidos' && (
                     <section className="admin-section">
                         <div className="section-heading">
                             <div>
@@ -955,6 +968,35 @@ function AdminPage({ onLogout }: AdminPageProps) {
                             </div>
                         )}
                     </section>
+                    )}
+
+                    {seccionActual === 'reportes' && (
+                        <section className="admin-section">
+                            <div className="section-heading">
+                                <div>
+                                    <span>ANÁLISIS</span>
+                                    <h2>Reportes</h2>
+                                </div>
+                            </div>
+                            <p className="empty-message">
+                                Aquí se mostrarán los indicadores y reportes de Pedidos360.
+                            </p>
+                        </section>
+                    )}
+
+                    {seccionActual === 'auditoria' && (
+                        <section className="admin-section">
+                            <div className="section-heading">
+                                <div>
+                                    <span>TRAZABILIDAD</span>
+                                    <h2>Auditoría</h2>
+                                </div>
+                            </div>
+                            <p className="empty-message">
+                                Aquí se mostrará el historial de eventos del sistema.
+                            </p>
+                        </section>
+                    )}
                 </>
             )}
 
@@ -963,7 +1005,8 @@ function AdminPage({ onLogout }: AdminPageProps) {
                 <span>•</span>
                 <span>Panel de Administración</span>
             </footer>
-        </main>
+            </main>
+        </>
     );
 }
 

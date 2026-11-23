@@ -7,9 +7,9 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${ENTRA_ISSUER_URI}
+          issuer-uri: ${ENTRA_ISSUER_URI:https://login.microsoftonline.com/49551105-7651-4748-a01b-22b28daeb087/v2.0}
           audiences:
-            - ${ENTRA_API_CLIENT_ID}
+            - ${ENTRA_API_CLIENT_ID:fa47563a-a68d-4d29-93c1-64bbfab52085}
 
 microservices:
   clientes:
@@ -24,4 +24,4 @@ microservices:
     base-url: ${MS_AUDIT_URL:http://localhost:8086}
 
 internal:
-  api-key: ${INTERNAL_API_KEY}
+  api-key: ${INTERNAL_API_KEY:Pedidos360-local-8f4c9b7e2a6d}

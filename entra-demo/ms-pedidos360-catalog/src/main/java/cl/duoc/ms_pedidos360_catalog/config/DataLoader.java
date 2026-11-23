@@ -37,43 +37,43 @@ public class DataLoader implements CommandLineRunner {
                 "Izhmash AKM",
                 "Legendario Fusil de asalto sovietico, en calibre 7.62x39mm",
                 "Fusiles",
-                "189990",
+                "1999990",
                 12
             ),
 
             producto(
                 "FUS-002",
-                "Colt M4A1",
-                "Fusil de asalto basado en la plataforma AR15, calibre 5.56x45mm (tambien acepta .223 Remington)",
+                "Izhmash AK-74",
+                "Fusil de asalto sovietico, en calibre 5.45x39mm, sucesor del AKM.",
                 "Fusiles",
-                "219990",
+                "2199990",
                 8
             ),
 
             producto(
                 "FUS-003",
-                "M4A1 SOPMOD",
-                "Fusil de asalto con modificaciones SOPMOD, calibre 5.56x45mm.",
+                "Izhmash AK-74M",
+                "Version moderna del AK-74, con mejoras en ergonomia y materiales, calibre 5.45x39mm.",
                 "Fusiles",
-                "249990",
+                "2499990",
                 15
             ),
 
             producto(
                 "FUS-004",
-                "SIG SG 550",
-                "Fusil de asalto suizo, calibre 5.56x45mm.",
+                "Izhmash AK-103",
+                "Fusil de asalto moderno de origen ruso, basado en la plataforma AK-74, calibre 7.62x39mm.",
                 "Fusiles",
-                "299990",
+                "2999990",
                 6
             ),
 
             producto(
                 "FUS-005",
-                "H&K 416",
-                "Fusil de asalto mejorado basado en la plataforma AR-15 con nuevo sistema de gas, calibre 5.56x45mm.",
+                "Izhmash AK-101",
+                "Fusil de asalto moderno de origen ruso, basado en la plataforma AK-74, calibre 5.56x45mm.",
                 "Fusiles",
-                "279990",
+                "2799990",
                 10
             ),
 
@@ -83,10 +83,10 @@ public class DataLoader implements CommandLineRunner {
 
             producto(
                 "ESC-001",
-                "Remington 870",
-                "Escopeta de accion de bombeo, calibre 12/70 numero 1 en agencias de policia y seguridad privada.",
+                "MP-153",
+                "Escopeta semiautomatica, calibre 12/70 de origen ruso, ideal para caceria y tiro deportivo.",
                 "Escopetas",
-                "149990",
+                "1499990",
                 9
             ),
 
@@ -95,16 +95,16 @@ public class DataLoader implements CommandLineRunner {
                 "Izhmash Saiga-12",
                 "Escopeta semiautomatica de origen ruso basada en la plataforma Kalashnikov, calibre 12/70.",
                 "Escopetas",
-                "169990",
+                "1699990",
                 7
             ),
 
             producto(
                 "ESC-003",
-                "Mossberg 500",
+                "MP-133",
                 "Escopeta de accion de bombeo, calibre 12/70, muy popular en el mercado civil y policial.",
                 "Escopetas",
-                "139990",
+                "1399990",
                 14
             ),
 
@@ -113,7 +113,7 @@ public class DataLoader implements CommandLineRunner {
                 "Hatsan Escort",
                 "Escopeta de accion de bombeo economica, calibre 12/70, ideal para principiantes y coleccionistas.",
                 "Escopetas",
-                "114990",
+                "1149990",
                 5
             ),
 
@@ -122,7 +122,7 @@ public class DataLoader implements CommandLineRunner {
                 "Benelli M4 Super 90",
                 "Escopeta de accion de bombeo, calibre 12/70, muy popular en el mercado civil y policial.",
                 "Escopetas",
-                "159990",
+                "1599990",
                 11
             ),
 
@@ -135,7 +135,7 @@ public class DataLoader implements CommandLineRunner {
                 "Ruger 10/22",
                 "Carabina semi-automatica de calibre .22LR, ideal para tiro deportivo y recreativo.",
                 "Carabinas",
-                "129990",
+                "849990",
                 13
             ),
 
@@ -144,7 +144,7 @@ public class DataLoader implements CommandLineRunner {
                 "Izshmash AKS-74U",
                 "Carabina compacta de origen ruso, version corta del AK-74, calibre 5.45x39mm.",
                 "Carabinas",
-                "154990",
+                "1549990",
                 10
             ),
 
@@ -162,16 +162,16 @@ public class DataLoader implements CommandLineRunner {
                 "TOZ Simonov SKS",
                 "Carabina de origen ruso, calibre 7.62x39mm, muy popular en el mercado civil y policial.",
                 "Carabinas",
-                "194990",
+                "899990",
                 6
             ),
 
             producto(
+                "CAR-005",
                 "Molot VPO-209",
-                "Orion Compact",
                 "Carabina semi-automatica de origen ruso, basada en la plataforma Kalashnikov, calibre .366 TKM, ideal para cacería, tiro deportivo y recreativo.",
                 "Carabinas",
-                "164990",
+                "899990",
                 12
             ),
 
@@ -181,46 +181,46 @@ public class DataLoader implements CommandLineRunner {
 
             producto(
                 "PIS-001",
-                "Glock 17 Gen 5",
-                "Ergonomica pistola austriaca de calibre 9x19mm, ampliamente utilizada por fuerzas de seguridad y civiles.",
+                "Makarov PM",
+                "Clasica pistola de origen ruso, calibre 9x18mm Makarov, ampliamente utilizada por fuerzas de seguridad y civiles.",
                 "Pistolas",
-                "89990",
+                "299990",
                 20
             ),
 
             producto(
                 "PIS-002",
-                "Glock 19 Gen 5",
-                "Ergonomica pistola austriaca compacta de calibre 9x19mm, ampliamente utilizada por fuerzas de seguridad y civiles.",
+                "Tokarev TT-33",
+                "Legendaria pistola de origen ruso, calibre 7.62x25mm Tokarev, ampliamente utilizada durante la Segunda Guerra Mundial y la Guerra Fria.",
                 "Pistolas",
-                "94990",
+                "349990",
                 16
             ),
 
             producto(
                 "PIS-003",
-                "Glock 21 Gen 5",
-                "Ergonomica pistola austriaca de calibre .45 ACP, ampliamente utilizada por fuerzas de seguridad y civiles.",
+                "MP-443 Grach",
+                "Ergonomica pistola de origen ruso, calibre 9x19mm Parabellum, ampliamente utilizada por fuerzas de seguridad y civiles.",
                 "Pistolas",
-                "109990",
+                "499990",
                 18
             ),
 
             producto(
                 "PIS-004",
-                "CZ 75 Phantom",
-                "Pistola Checa extremadamente precisa y confiable, de calibre 9x19mm.",
+                "PL-15",
+                "Pistola rusa extremadamente precisa y confiable, de calibre 9x19mm.",
                 "Pistolas",
-                "84990",
+                "549990",
                 22
             ),
 
             producto(
                 "PIS-005",
-                "Beretta M9A3",
-                "Pistola italiana de calibre 9x19mm, fue la pistola de servicio estandar del ejercito de los Estados Unidos durante varias decadas.",
+                "SR-1 Gyurza",
+                "Pistola rusa de calibre 9X21mm, utilizada por fuerzas especiales y unidades de elite, con un diseño moderno y ergonomico.",
                 "Pistolas",
-                "119990",
+                "699990",
                 9
             ),
 
@@ -282,14 +282,14 @@ public class DataLoader implements CommandLineRunner {
                 "Cargador STANAG 30",
                 "Cargador de 30 rondas estandar para multitud de fusiles de la OTAN, acepta cartuchos de calibre 5.56x45mm, .223 Remington y .300 Blackout.",
                 "Cargadores",
-                "24990",
+                "49990",
                 30
             ),
 
             producto(
                 "MAG-002",
-                "Cargador de bakelita 30 para plataformas AK calibre 5.45x39mm.",
-                "Cargador compatible con multitud de fusiles tipo AK, capacidad de 30 rondas, fabricado en bakelita y compatible con cartuchos de calibre 5.45x39mm.",
+                "Cargador de bakelita 6L9 para plataformas AK calibre 7.62x39mm.",
+                "Cargador compatible con multitud de fusiles tipo AK, capacidad de 30 rondas, fabricado en bakelita y compatible con cartuchos de calibre 7.62x39mm y .366 TKM.",
                 "Cargadores",
                 "29990",
                 25
@@ -297,8 +297,8 @@ public class DataLoader implements CommandLineRunner {
 
             producto(
                 "MAG-003",
-                "Cargador MAGPUL PMAG 30",
-                "Cargador de 30 rondas fabricado por MAGPUL, compatible con multitud de fusiles estandar de la OTAN, acepta cartuchos de calibre 5.56x45mm, .223 Remington y .300 Blackout.",
+                "Cargador de bakelita 6L20 para plataformas AK calibre 5.45x39mm.",
+                "Cargador de 30 rondas fabricado por Izhmash, compatible con fusiles tipo AK de calibre 5.45x39mm, fabricado en bakelita.",
                 "Cargadores",
                 "19990",
                 35
@@ -306,8 +306,8 @@ public class DataLoader implements CommandLineRunner {
 
             producto(
                 "MAG-004",
-                "Cargador de Glock 9x19mm de 17 rondas",
-                "Cargador de 17 rondas compatible con pistolas Glock de calibre 9x19mm, fabricado en acero y polimero.",
+                "Cargador de polimero 6L23 para plataformas AK calibre 5.56x45mm.",
+                "Cargador de 30 rondas fabricado por Izhmash, compatible con fusiles tipo AK de calibre 5.56x45mm, fabricado en polimero.",
                 "Cargadores",
                 "27990",
                 18
@@ -315,8 +315,8 @@ public class DataLoader implements CommandLineRunner {
 
             producto(
                 "MAG-005",
-                "Cargador de Glock .40 S&W de 15 rondas",
-                "Cargador de 15 rondas compatible con pistolas Glock de calibre .40 S&W, fabricado en acero y polimero.",
+                "Cargador de polimero 6L29 para plataformas AK calibre 5.56x45mm.",
+                "Cargador de 30 rondas fabricado por Izhmash, compatible con fusiles tipo AK de calibre 5.56x45mm, fabricado en polimero.",
                 "Cargadores",
                 "22990",
                 27
