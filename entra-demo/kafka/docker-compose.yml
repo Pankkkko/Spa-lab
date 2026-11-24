@@ -1,0 +1,85 @@
+services:
+
+  # ==========================================================
+  # KAFKA BROKER
+  # ==========================================================
+  kafka:
+    image: apache/kafka:4.2.2
+    container_name: kafka
+    hostname: kafka
+
+    ports:
+      - "9092:9092"
+
+    environment:
+      # Identificación del nodo
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+
+      # Listeners
+      KAFKA_LISTENERS: "EXTERNAL://0.0.0.0:9092,INTERNAL://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093"
+
+      # Direcciones que Kafka anuncia a sus clientes
+      KAFKA_ADVERTISED_LISTENERS: "EXTERNAL://${KAFKA_EXTERNAL_HOST}:9092,INTERNAL://kafka:29092"
+
+      # Protocolos
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT"
+
+      # Comunicación entre brokers
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+
+      # Configuración KRaft
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+
+      # Configuración para un único nodo
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+
+      # Directorio persistente
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - /opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null 2>&1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+    restart: unless-stopped
+
+  # ==========================================================
+  # KAFKA TOPIC INITIALIZER
+  # ==========================================================
+  kafka-init:
+    image: apache/kafka:4.2.2
+    container_name: kafka-init
+
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+    volumes:
+      - ./init.sh:/scripts/init.sh:ro
+
+    environment:
+      # Comunicación interna entre contenedores
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+
+      # Ejecutables Kafka
+      KAFKA_TOPICS_COMMAND: /opt/kafka/bin/kafka-topics.sh
+      KAFKA_CONFIGS_COMMAND: /opt/kafka/bin/kafka-configs.sh
+
+    entrypoint: ["/bin/bash", "/scripts/init.sh"]
+
+    restart: "no"
+
+volumes:
+  kafka_data:
