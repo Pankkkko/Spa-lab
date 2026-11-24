@@ -1,0 +1,18 @@
+services:
+  ms-audit:
+    build:
+      context: ./ms-pedidos360-audit
+      dockerfile: Dockerfile
+    container_name: ms-pedidos360-audit
+    ports:
+      - "8086:8086"
+    environment:
+      # Base de datos MySQL (RDS)
+      AUDIT_DB_URL: ${AUDIT_DB_URL}
+      AUDIT_DB_USERNAME: ${AUDIT_DB_USERNAME}
+      AUDIT_DB_PASSWORD: ${AUDIT_DB_PASSWORD}
+
+      # Kafka
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+
+    restart: unless-stopped
