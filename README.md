@@ -1,213 +1,275 @@
 # Pedidos360
 
-Aplicación full-stack con frontend React + Vite + MSAL y backend desplegado en AWS EC2. El frontend corre localmente, mientras que los microservicios y el BFF ya están en la nube y solo requieren que estén levantados.
+Aplicación full-stack para la gestión de pedidos con frontend React/Vite, autenticación Microsoft Entra ID y una arquitectura de BFF con microservicios Spring Boot.
 
-## 1. Resumen rápido
+## 1. Componentes
 
-- Frontend: se ejecuta localmente con Vite
-- Login: Microsoft Entra ID (MSAL)
-- Tenant: el tenant de esta organización
-- Backend: servicios Java en EC2 / AWS
-- API principal usada por el frontend: `https://tmbul2u2ic.execute-api.us-east-1.amazonaws.com/lanzar`
+| Componente | Puerto local | Responsable |
+|---|---:|---|
+| Frontend React/Vite | 5173 | Interfaz web y autenticación MSAL |
+| BFF | 8080 | Seguridad, orquestación y comunicación con los micros |
+| `ms-clientes` | 8081 | CRUD y consulta de clientes |
+| `ms-pedidos` | 8082 | CRUD y consulta de pedidos |
+| `ms-pedidos360-catalog` | 8083 | Catálogo de productos |
+| `ms-pedidos360-notify` | 8084 | Notificaciones por correo y procesamiento de comandos RabbitMQ |
+| `ms-pedidos360-report` | 8085 | KPIs y reportes de ventas, estados y tiempos de entrega |
+| `ms-pedidos360-audit` | 8086 | Registro y consulta de auditoría de pedidos |
 
-La app usa autenticación con MSAL y solicita scopes del API registrado en Entra ID:
+El frontend se comunica con el BFF a través del API Gateway o directamente con la instancia configurada del BFF. Los microservicios no deben exponerse al navegador.
 
-- `api://fa47563a-a68d-4d29-93c1-64bbfab52085/pedidos.read`
-- `api://fa47563a-a68d-4d29-93c1-64bbfab52085/pedidos.write`
+## 2. Arquitectura de integración
 
-## 2. Requisitos
+- El BFF valida el token JWT emitido por Entra ID.
+- `ms-pedidos360-audit` consume eventos desde Kafka y persiste el historial en MySQL.
+- `ms-pedidos360-report` consume eventos desde Kafka/RabbitMQ y genera sus datos de reporte.
+- `ms-pedidos360-notify` escucha comandos de RabbitMQ y procesa correos, pedidos y facturas.
+- RabbitMQ usa las colas `q.cmd.email`, `q.cmd.pedidos` y `q.cmd.invoice`, con colas DLQ asociadas.
+- Kafka usa los topics `orders.events` y `audit.timeline`.
 
-- Node.js 18+ / 20+
+## 3. Requisitos
+
+- Node.js 18 o superior
 - npm
-- Git
-- Un usuario válido del tenant de Microsoft Entra ID configurado en la app
-- Acceso a la instancia EC2 donde están desplegados los servicios
+- Java 17 o superior
+- Maven Wrapper incluido en cada proyecto
+- Docker y Docker Compose
+- MySQL para `ms-pedidos360-audit` y `ms-pedidos360-report`
+- RabbitMQ para notificaciones y reportes
+- Kafka para eventos de pedidos y auditoría
+- Cuenta válida del tenant de Microsoft Entra ID
 
-## 3. Estructura de trabajo del proyecto
+## 4. Estructura del repositorio
 
 ```text
 entra-demo/
-├── src/
-├── public/
-├── api/
-├── .env.local
-├── docker-compose.yml
-├── package.json
-├── vite.config.ts
-├── README.md
-├── ms-clientes/
-├── ms-pedidos/
-└── api/
+├── src/                         # Frontend React
+├── api/api/                     # BFF
+├── ms-clientes/                 # Microservicio de clientes
+├── ms-pedidos/ms-pedidos/       # Microservicio de pedidos
+├── ms-pedidos360-catalog/       # Microservicio de catálogo
+├── ms-pedidos360-notify/        # Microservicio de notificaciones
+├── ms-pedidos360-report/        # Microservicio de reportes
+├── ms-pedidos360-audit/         # Microservicio de auditoría
+└── kafka/                       # Scripts de inicialización de Kafka
 ```
 
-## 4. Arranque del frontend local
+## 5. Arranque local del frontend
 
 Desde la raíz del proyecto:
 
-```bash
+```powershell
 cd entra-demo
 npm install
 npm run dev
 ```
 
-Luego abre en el navegador:
+Abrir `http://localhost:5173`.
 
-```text
-http://localhost:5173
-```
-
-Si el proyecto corre en Vite, el puerto por defecto es `5173`.
-
-### Variables de entorno del frontend
-
-
-```
-
-En esta app, la autenticación se configura en `src/authConfig.ts` usando:
+Variables usadas por el frontend:
 
 - `VITE_ENTRA_TENANT_ID`
 - `VITE_SPA_CLIENT_ID`
-- `redirectUri: window.location.origin + '/redirect.html'`
+- `VITE_API_CLIENT_ID`
+- `VITE_BFF_BASE_URL`
 
-## 5. Backend en AWS EC2
+La redirección de MSAL se configura como `window.location.origin + '/redirect.html'`.
 
-El backend no se ejecuta localmente en esta etapa. Los microservicios y el BFF ya están desplegados en EC2 y solo deben estar levantados.
+## 6. Arranque local del backend
 
-### Endpoints actuales en uso
+Ejecutar cada microservicio desde su carpeta. Las configuraciones tienen valores locales por defecto.
 
-El frontend usa una URL pública del BFF:
+```powershell
+cd entra-demo\api\api
+.\mvnw.cmd spring-boot:run
+
+cd ..\..\ms-clientes
+.\mvnw.cmd spring-boot:run
+
+cd ..\ms-pedidos\ms-pedidos
+.\mvnw.cmd spring-boot:run
+
+cd ..\..\ms-pedidos360-catalog
+.\mvnw.cmd spring-boot:run
+
+cd ..\ms-pedidos360-notify
+.\mvnw.cmd spring-boot:run
+
+cd ..\ms-pedidos360-report
+.\mvnw.cmd spring-boot:run
+
+cd ..\ms-pedidos360-audit
+.\mvnw.cmd spring-boot:run
+```
+
+`ms-pedidos360-notify` incluye Docker Compose:
+
+```powershell
+cd entra-demo\ms-pedidos360-notify
+docker compose up --build
+```
+
+### Variables principales
+
+BFF:
+
+- `MS_CLIENTES_URL`
+- `MS_PEDIDOS_URL`
+- `MS_CATALOGO_URL`
+- `MS_REPORT_URL`
+- `MS_AUDIT_URL`
+- `ENTRA_ISSUER_URI`
+- `ENTRA_API_CLIENT_ID`
+- `INTERNAL_API_KEY`
+
+Notificaciones:
+
+- `SPRING_RABBITMQ_HOST`
+- `SPRING_RABBITMQ_PORT`
+- `SPRING_RABBITMQ_USERNAME`
+- `SPRING_RABBITMQ_PASSWORD`
+- `MAIL_HOST`
+- `MAIL_PORT`
+- `MAIL_USERNAME`
+- `MAIL_PASSWORD`
+- `MS_CLIENTES_URL`
+
+Reportes:
+
+- `REPORT_DB_URL`
+- `REPORT_DB_USERNAME`
+- `REPORT_DB_PASSWORD`
+- `RABBITMQ_HOST`
+- `RABBITMQ_USERNAME`
+- `RABBITMQ_PASSWORD`
+- `KAFKA_BOOTSTRAP_SERVERS`
+
+Auditoría:
+
+- `AUDIT_DB_URL`
+- `AUDIT_DB_USERNAME`
+- `AUDIT_DB_PASSWORD`
+- `KAFKA_BOOTSTRAP_SERVERS`
+
+No agregues credenciales reales a `application.yml`, a este README ni al control de versiones. Usa variables de entorno o un administrador de secretos.
+
+## 7. Endpoints principales
+
+Los endpoints de reportes y auditoría pasan por el BFF:
+
+- `GET /api/report/kpis`
+- `GET /api/report/ventas/hora`
+- `GET /api/report/productos/top`
+- `GET /api/report/pedidos/estados`
+- `GET /api/report/tiempos-entrega`
+- `GET /api/audit`
+- `GET /api/audit/pedido/{pedidoId}`
+- `GET /api/audit/{id}`
+- `GET /api/notificaciones/health`
+
+Ejemplos directos de los micros:
 
 ```text
-https://tmbul2u2ic.execute-api.us-east-1.amazonaws.com/lanzar
+http://localhost:8085/api/report/kpis
+http://localhost:8086/api/audit
+http://localhost:8084/api/notificaciones/health
 ```
 
-Esto se encuentra en archivos como:
+## 8. Mensajería
 
-- `src/api/pedidosApi.ts`
-- `src/api/adminApi.ts`
-
-### ¿Qué debe estar prendido?
-
-- EC2 con el BFF
-- EC2 con `ms-clientes`
-- EC2 con `ms-pedidos`
-- Base de datos RDS asociada a cada microservicio
-
-### Ejemplo de arranque en cada EC2
-
-Si el servicio está empaquetado como JAR, normalmente se levanta así:
+Inicializar los topics de Kafka:
 
 ```bash
-cd /opt/app
-nohup java -jar ms-clientes.jar --server.port=8081 > /var/log/ms-clientes.log 2>&1 &
-nohup java -jar ms-pedidos.jar --server.port=8082 > /var/log/ms-pedidos.log 2>&1 &
-nohup java -jar bff.jar --server.port=8080 > /var/log/bff.log 2>&1 &
+cd entra-demo/kafka
+chmod +x init-topics.sh
+./init-topics.sh
 ```
 
-Si usas `systemd`, el patrón es:
+Para usar otro broker:
 
 ```bash
-sudo systemctl daemon-reload
-sudo systemctl start ms-clientes
-sudo systemctl start ms-pedidos
-sudo systemctl start bff
-sudo systemctl status ms-clientes ms-pedidos bff
+KAFKA_BOOTSTRAP_SERVERS=10.0.0.10:9092 ./init-topics.sh
 ```
 
-> Ajusta el nombre del servicio a como lo hayas definido en la EC2.
+## 9. Flujo normal de uso
 
-## 6. Login con MSAL y usuarios del tenant
+1. Levantar Kafka y RabbitMQ.
+2. Levantar MySQL y las bases usadas por reportes y auditoría.
+3. Levantar los microservicios dependientes.
+4. Levantar el BFF en el puerto `8080`.
+5. Levantar el frontend en `5173`.
+6. Iniciar sesión con una cuenta del tenant.
+7. Usar el frontend para crear o consultar pedidos y visualizar reportes o auditoría.
 
-La autenticación se realiza con Microsoft Entra ID y solo funciona para usuarios que existan en este tenant.
+## 10. Build y pruebas
 
-### Importante
+Frontend:
 
-- El usuario debe estar registrado en el tenant de la organización.
-- La app registra en Azure debe estar configurada con este tenant.
-- El cliente SPA y la API deben estar correctamente autorizados.
-- Si el usuario no pertenece al tenant, MSAL rechazará el login.
-
-### Datos clave del tenant
-```
-
-```text
-https://login.microsoftonline.com/49551105-7651-4748-a01b-22b28daeb087
-```
-
-## 7. Flujo normal de uso
-
-1. Levantar el frontend local con `npm run dev`
-2. Verificar que el backend y BFF estén corriendo en AWS EC2
-3. Abrir la app en `http://localhost:5173`
-4. Iniciar sesión con una cuenta del tenant
-5. La app obtiene un access token con MSAL
-6. El frontend llama a la API/BFF con el token en el header `Authorization: Bearer ...`
-7. El backend valida el token y responde con clientes y pedidos
-
-## 8. Comandos útiles
-
-### Instalar dependencias
-
-```bash
-npm install
-```
-
-### Levantar frontend
-
-```bash
-npm run dev
-```
-
-### Build de producción
-
-```bash
+```powershell
+cd entra-demo
 npm run build
-```
-
-### Previsualizar build
-
-```bash
 npm run preview
 ```
 
-## 9. Solución de problemas comunes
+Microservicios:
 
-### El login no funciona
+```powershell
+cd entra-demo\ms-pedidos360-notify
+.\mvnw.cmd test
 
-- Verificar que el usuario pertenece al tenant correcto.
-- Revisar que `VITE_ENTRA_TENANT_ID` y `VITE_SPA_CLIENT_ID` estén correctos.
-- Revisar que la app registration en Azure tenga la redirección correcta.
+cd ..\ms-pedidos360-report
+.\mvnw.cmd test
 
-### El frontend carga pero no trae datos
-
-- Verificar que el BFF en AWS esté levantado.
-- Revisar la URL base del BFF.
-- Revisar logs del servicio EC2.
-- Verificar que el token MSAL se está enviando en la request.
-
-### El backend no responde
-
-- Confirmar que la EC2 está encendida.
-- Revisar proceso Java activo:
-
-```bash
-ps -ef | grep java
+cd ..\ms-pedidos360-audit
+.\mvnw.cmd test
 ```
 
-- Revisar logs:
+## 11. Despliegue en AWS EC2
+
+Los servicios pueden ejecutarse como JAR con `java -jar` o como servicios `systemd`.
+
+Ejemplo:
 
 ```bash
-tail -f /var/log/ms-clientes.log
-tail -f /var/log/ms-pedidos.log
+nohup java -jar ms-pedidos360-notify.jar --server.port=8084 > /var/log/ms-pedidos360-notify.log 2>&1 &
+nohup java -jar ms-pedidos360-report.jar --server.port=8085 > /var/log/ms-pedidos360-report.log 2>&1 &
+nohup java -jar ms-pedidos360-audit.jar --server.port=8086 > /var/log/ms-pedidos360-audit.log 2>&1 &
+```
+
+Al desplegar, configura las URLs internas del BFF y cada dependencia con las variables de entorno correspondientes.
+
+## 12. Solución de problemas
+
+### El login falla
+
+- Verificar que el usuario pertenezca al tenant configurado.
+- Verificar `VITE_ENTRA_TENANT_ID`, `VITE_SPA_CLIENT_ID` y `VITE_API_CLIENT_ID`.
+- Confirmar la redirección `http://localhost:5173/redirect.html`.
+
+### El frontend no obtiene datos
+
+- Verificar que el BFF esté disponible.
+- Revisar `VITE_BFF_BASE_URL`.
+- Confirmar que el access token se envía en `Authorization: Bearer ...`.
+- Revisar los logs y las URLs internas del BFF.
+
+### Notificaciones no llegan
+
+- Verificar RabbitMQ y sus variables de entorno.
+- Confirmar las colas `q.cmd.email`, `q.cmd.pedidos` y `q.cmd.invoice`.
+- Revisar las DLQ si los mensajes se rechazan.
+- Verificar el host, puerto y credenciales SMTP.
+
+### Reportes o auditoría no reciben eventos
+
+- Verificar el broker configurado en `KAFKA_BOOTSTRAP_SERVERS`.
+- Confirmar que existan los topics `orders.events` y `audit.timeline`.
+- Revisar la conectividad y credenciales de las bases `db_report` y `db_audit`.
+
+### Logs en EC2
+
+```bash
+tail -f /var/log/ms-pedidos360-notify.log
+tail -f /var/log/ms-pedidos360-report.log
+tail -f /var/log/ms-pedidos360-audit.log
 tail -f /var/log/bff.log
 ```
-
-## 10. Recomendación final
-
-Para trabajar en este proyecto:
-
-- Frontend: correr localmente
-- Backend: validar que EC2 esté encendido y accesible
-- Login: usar usuarios del tenant configurado en Entra ID
-- Si algo falla, revisar primero los logs del servicio y la configuración MSAL del tenant
-
