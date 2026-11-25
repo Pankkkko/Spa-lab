@@ -13,5 +13,7 @@ services:
       MS_CLIENTES_URL: ${MS_CLIENTES_URL}
       MS_PEDIDOS_URL: ${MS_PEDIDOS_URL}
       MS_CATALOGO_URL: ${MS_CATALOGO_URL}
+      MS_REPORT_URL: ${MS_REPORT_URL}
+      MS_AUDIT_URL: ${MS_AUDIT_URL}
       INTERNAL_API_KEY: ${INTERNAL_API_KEY}
     restart: unless-stopped
